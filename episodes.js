@@ -598,7 +598,9 @@ window.EPISODES = [
     verificationStatus: "needs-review",
     lastVerified: "",
     lastUpdated: "",
-    replays: []
+    replays: [
+      { url: "https://www.bilibili.com/video/BV1vgkCB9E9K/", by: "看我闪击印度" }
+    ]
   },
   {
     id: "episode-frankenstein",

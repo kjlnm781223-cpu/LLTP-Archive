@@ -139,18 +139,6 @@
     ]);
   }
 
-  /* 小红书笔记链接：手机端先试着直接唤起小红书 App，没唤起再退回网页版。
-     小红书网页版强制登录，直接点链接往往只到登录页，唤起 App 才打得开。
-     （scheme 取自公开整理：iOS xhsdiscover:// 、Android xhsdiscovery://） */
-  function xhsNoteId(url) {
-    var m = String(url || "").match(/[0-9a-fA-F]{16,}/);
-    return m ? m[0] : null;
-  }
-
-  function isMobileUA() {
-    return /Android|iPhone|iPad|iPod|HarmonyOS|Mobile/i.test(navigator.userAgent);
-  }
-
   // 微信 / QQ / 百度等内置浏览器会拦截「网页跳 App」，且部分（如百度）会把跳转变成下载。
   function inAppBrowserName() {
     var ua = navigator.userAgent;
@@ -164,27 +152,11 @@
     return null;
   }
 
-  function openXhsApp(noteId, webUrl) {
-    var scheme = "xhsdiscover://item/" + noteId;
-    var t0 = Date.now();
-    var left = false;
-    var onHide = function () { left = true; };
-    document.addEventListener("visibilitychange", onHide);
-    try { window.location.href = scheme; } catch (e) { /* 忽略 */ }
-    window.setTimeout(function () {
-      document.removeEventListener("visibilitychange", onHide);
-      // 页面还在前台、也没被切走 → 说明 App 没唤起，退回网页版
-      if (!left && document.visibilityState === "visible" && Date.now() - t0 < 2500) {
-        window.location.href = webUrl;
-      }
-    }, 1200);
-  }
-
-  function copyText(text, btn) {
+  function copyText(text, btn, doneLabel) {
+    var old = btn.textContent;
     var done = function () {
-      var old = btn.textContent;
-      btn.textContent = "已复制";
-      window.setTimeout(function () { btn.textContent = old; }, 1600);
+      btn.textContent = doneLabel || "已复制";
+      window.setTimeout(function () { btn.textContent = old; }, 1800);
     };
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text, done); });
@@ -203,36 +175,22 @@
     document.body.removeChild(ta);
   }
 
-  /* 生成「打开小红书」相关节点：主按钮 + 复制链接（+ 内置浏览器提示）。
+  /* 小红书链接：点按钮＝复制链接，再到小红书 App 里打开。
+     小红书网页版强制登录、内置浏览器又会拦截跳转，复制是最稳的方式；
+     电脑端另给二维码（见 xhsQrBlock）。
      url 为空时返回空数组，调用方自行回退到「暂未发布」文案。 */
-  function xhsLinkNodes(url, label) {
+  function xhsLinkNodes(url) {
     var u = safeUrl(url);
     if (!u) return [];
-    var nodes = [];
-    var id = xhsNoteId(u);
-    var btn = el("a", {
-      cls: "btn primary small",
-      href: u,
-      text: label || "在小红书阅读 ↗",
-      attrs: { target: "_blank", rel: "noopener noreferrer" }
-    });
-    if (id && isMobileUA()) {
-      btn.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        openXhsApp(id, u);
-      });
-    }
-    nodes.push(btn);
-
-    var copyBtn = el("button", { cls: "btn ghost small", text: "复制链接", attrs: { type: "button" } });
-    copyBtn.addEventListener("click", function () { copyText(u, copyBtn); });
-    nodes.push(copyBtn);
+    var btn = el("button", { cls: "btn primary small", text: "复制链接去小红书", attrs: { type: "button" } });
+    btn.addEventListener("click", function () { copyText(u, btn, "已复制 · 去小红书打开"); });
+    var nodes = [btn];
 
     var app = inAppBrowserName();
     if (app) {
       nodes.push(el("div", {
         cls: "xhs-tip",
-        text: "当前在" + app + "内置浏览器中，可能无法直接打开小红书：如跳转失败，请点右上角「…」选择“在浏览器打开”，或复制链接后到小红书 App 内粘贴。"
+        text: "在" + app + "里可能打不开小红书：复制链接后，打开小红书 App 粘贴即可。"
       }));
     }
     return nodes;
@@ -505,7 +463,7 @@
         it.orig ? el("div", { cls: "sp-orig", text: it.orig }) : null,
         el("p", { text: it.note || "笔记已发布。" }),
         el("div", { cls: "sp-foot" },
-          xhsLinkNodes(it.url, it.kind === "note" ? "阅读笔记 ↗" : "阅读合集 ↗").concat([
+          xhsLinkNodes(it.url).concat([
             it.href ? el("a", { cls: "btn ghost small", href: it.href, text: "查看档案" }) : null
           ])
         )
@@ -913,7 +871,7 @@
     var replays = (ep.replays || []).filter(function (r) { return safeUrl(r.url); });
 
     var xhsAct = el("div", { cls: "src-act" });
-    var xhsNodes = xhsLinkNodes(ep.xiaohongshuUrl, "在小红书阅读 ↗");
+    var xhsNodes = xhsLinkNodes(ep.xiaohongshuUrl);
     if (xhsNodes.length) xhsNodes.forEach(function (n) { xhsAct.appendChild(n); });
     else if (ep.xiaohongshuNoteTitle) xhsAct.appendChild(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
     else xhsAct.appendChild(el("span", { cls: "missing", text: "暂未发布" }));
@@ -950,7 +908,7 @@
             el("div", {
               cls: "src-sub",
               text: replays.length
-                ? ("粉丝字幕组搬运 · " + replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、"))
+                ? replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、")
                 : "暂未收录"
             })
           ]),
@@ -1058,7 +1016,7 @@
     }
 
     var linkActions = [];
-    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl, "在小红书看带读笔记 ↗");
+    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl);
     if (xhsNodes.length) xhsNodes.forEach(function (n) { linkActions.push(n); });
     else if (book.xiaohongshuNoteTitle) linkActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
     else linkActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
@@ -1160,7 +1118,7 @@
     root.appendChild(epPanel);
 
     var actions = [];
-    var xhsNodes = xhsLinkNodes(m.xiaohongshuUrl, "在小红书看带读笔记 ↗");
+    var xhsNodes = xhsLinkNodes(m.xiaohongshuUrl);
     if (xhsNodes.length) xhsNodes.forEach(function (n) { actions.push(n); });
     else if (m.xiaohongshuNoteTitle) actions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
     else actions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
