@@ -5,5 +5,4 @@ Allow: /
 # 本地分享卡工作台，不对搜索引擎开放
 Disallow: /share-studio.html
 
-# 尚未配置正式域名。部署并确定域名后运行：
-# node gen-seo.mjs --site-url https://你的正式域名
+Sitemap: https://kjlnm781223-cpu.github.io/LLTP-Archive/sitemap.xml

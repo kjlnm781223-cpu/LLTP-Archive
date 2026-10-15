@@ -122,6 +122,122 @@
     });
   }
 
+  /* 小红书电脑网页会强制登录，只有手机 App 能直接打开；
+     电脑端补一张二维码方便扫码进去（移动端由 CSS 隐藏）。 */
+  function xhsQrBlock(url) {
+    var u = safeUrl(url);
+    if (!u) return null;
+    var m = u.match(/[0-9a-fA-F]{16,}/); // 笔记 ID
+    var src = (m && window.XHS_QR) ? window.XHS_QR[m[0]] : null;
+    if (!src) return null; // 还没生成二维码就整块不显示
+    return el("div", { cls: "xhs-qr" }, [
+      el("img", {
+        cls: "xhs-qr-img",
+        attrs: { src: src, alt: "小红书笔记二维码", width: "104", height: "104" }
+      }),
+      el("div", { cls: "xhs-qr-cap", text: "电脑打不开小红书？用手机扫码直接进 App。" })
+    ]);
+  }
+
+  /* 小红书笔记链接：手机端先试着直接唤起小红书 App，没唤起再退回网页版。
+     小红书网页版强制登录，直接点链接往往只到登录页，唤起 App 才打得开。
+     （scheme 取自公开整理：iOS xhsdiscover:// 、Android xhsdiscovery://） */
+  function xhsNoteId(url) {
+    var m = String(url || "").match(/[0-9a-fA-F]{16,}/);
+    return m ? m[0] : null;
+  }
+
+  function isMobileUA() {
+    return /Android|iPhone|iPad|iPod|HarmonyOS|Mobile/i.test(navigator.userAgent);
+  }
+
+  // 微信 / QQ / 百度等内置浏览器会拦截「网页跳 App」，且部分（如百度）会把跳转变成下载。
+  function inAppBrowserName() {
+    var ua = navigator.userAgent;
+    if (/MicroMessenger/i.test(ua)) return "微信";
+    if (/Weibo/i.test(ua)) return "微博";
+    if (/QQ\//i.test(ua) || /QQBrowser/i.test(ua)) return "QQ";
+    if (/baidubrowser|BIDUBrowser|baidu\.com/i.test(ua)) return "百度";
+    if (/Alipay/i.test(ua)) return "支付宝";
+    if (/DingTalk/i.test(ua)) return "钉钉";
+    if (/Toutiao|NewsArticle/i.test(ua)) return "今日头条";
+    return null;
+  }
+
+  function openXhsApp(noteId, webUrl) {
+    var scheme = "xhsdiscover://item/" + noteId;
+    var t0 = Date.now();
+    var left = false;
+    var onHide = function () { left = true; };
+    document.addEventListener("visibilitychange", onHide);
+    try { window.location.href = scheme; } catch (e) { /* 忽略 */ }
+    window.setTimeout(function () {
+      document.removeEventListener("visibilitychange", onHide);
+      // 页面还在前台、也没被切走 → 说明 App 没唤起，退回网页版
+      if (!left && document.visibilityState === "visible" && Date.now() - t0 < 2500) {
+        window.location.href = webUrl;
+      }
+    }, 1200);
+  }
+
+  function copyText(text, btn) {
+    var done = function () {
+      var old = btn.textContent;
+      btn.textContent = "已复制";
+      window.setTimeout(function () { btn.textContent = old; }, 1600);
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, function () { legacyCopy(text, done); });
+      return;
+    }
+    legacyCopy(text, done);
+  }
+  function legacyCopy(text, done) {
+    var ta = el("textarea", { attrs: { readonly: "" } });
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); } catch (e) { /* 忽略 */ }
+    document.body.removeChild(ta);
+  }
+
+  /* 生成「打开小红书」相关节点：主按钮 + 复制链接（+ 内置浏览器提示）。
+     url 为空时返回空数组，调用方自行回退到「暂未发布」文案。 */
+  function xhsLinkNodes(url, label) {
+    var u = safeUrl(url);
+    if (!u) return [];
+    var nodes = [];
+    var id = xhsNoteId(u);
+    var btn = el("a", {
+      cls: "btn primary small",
+      href: u,
+      text: label || "在小红书阅读 ↗",
+      attrs: { target: "_blank", rel: "noopener noreferrer" }
+    });
+    if (id && isMobileUA()) {
+      btn.addEventListener("click", function (ev) {
+        ev.preventDefault();
+        openXhsApp(id, u);
+      });
+    }
+    nodes.push(btn);
+
+    var copyBtn = el("button", { cls: "btn ghost small", text: "复制链接", attrs: { type: "button" } });
+    copyBtn.addEventListener("click", function () { copyText(u, copyBtn); });
+    nodes.push(copyBtn);
+
+    var app = inAppBrowserName();
+    if (app) {
+      nodes.push(el("div", {
+        cls: "xhs-tip",
+        text: "当前在" + app + "内置浏览器中，可能无法直接打开小红书：如跳转失败，请点右上角「…」选择“在浏览器打开”，或复制链接后到小红书 App 内粘贴。"
+      }));
+    }
+    return nodes;
+  }
+
   // 来源列表已移除：站内资料来自用户自建的期数清单与豆瓣公开事实，不再做第三方来源标注。
 
   /* ---------------- 顶部公告（新一期 / 预告） ---------------- */
@@ -792,36 +908,54 @@
       ep.note ? el("p", { cls: "note-line", text: "注：" + ep.note }) : null
     ]));
 
-    var srcActions = [];
-    var noteLink = externalBtn("查看带读笔记 ↗", ep.xiaohongshuUrl, "primary small");
-    if (noteLink) srcActions.push(noteLink);
-    else if (ep.xiaohongshuNoteTitle) srcActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
-    else srcActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
-
-    /* 中字回放：粉丝字幕组搬运，非官方来源，按钮上直接写明来源 */
+    /* 中字回放（B 站）与带读笔记（小红书）分成两行，平台一眼可辨 */
     var replays = (ep.replays || []).filter(function (r) { return safeUrl(r.url); });
-    replays.forEach(function (r) {
-      srcActions.push(el("a", {
-        cls: "btn ghost small",
-        href: safeUrl(r.url),
-        text: "中字回放 · " + (r.by || "粉丝字幕组") + " ↗",
-        attrs: { target: "_blank", rel: "noopener noreferrer" }
-      }));
-    });
+
+    var xhsAct = el("div", { cls: "src-act" });
+    var xhsNodes = xhsLinkNodes(ep.xiaohongshuUrl, "在小红书阅读 ↗");
+    if (xhsNodes.length) xhsNodes.forEach(function (n) { xhsAct.appendChild(n); });
+    else if (ep.xiaohongshuNoteTitle) xhsAct.appendChild(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
+    else xhsAct.appendChild(el("span", { cls: "missing", text: "暂未发布" }));
+
+    var biliAct = null;
+    if (replays.length) {
+      biliAct = el("div", { cls: "src-act" });
+      replays.forEach(function (r) {
+        biliAct.appendChild(el("a", {
+          cls: "btn ghost small",
+          href: safeUrl(r.url),
+          text: (r.by || "粉丝字幕组") + " ↗",
+          attrs: { target: "_blank", rel: "noopener noreferrer" }
+        }));
+      });
+    }
 
     root.appendChild(el("section", { cls: "panel" }, [
-      el("h2", { text: "来源与链接" }),
-      el("dl", { cls: "kv" }, [
-        el("dt", { text: "中字回放" }),
-        el("dd", {
-          text: replays.length
-            ? ("粉丝字幕组搬运：" + replays.map(function (r) { return r.by; }).join("、") + "（非官方来源）")
-            : "暂未收录"
-        }),
-        el("dt", { text: "笔记标题" }),
-        el("dd", { text: ep.xiaohongshuNoteTitle || "—" })
-      ]),
-      el("div", { cls: "actions" }, srcActions)
+      el("h2", { text: "中字回放与带读笔记" }),
+      el("ul", { cls: "src-list" }, [
+        el("li", { cls: "src-row src-row--xhs" }, [
+          el("span", { cls: "src-plat src-plat--xhs", text: "小红书" }),
+          el("div", { cls: "src-main" }, [
+            el("div", { cls: "src-title", text: "带读笔记" }),
+            el("div", { cls: "src-sub", text: ep.xiaohongshuNoteTitle || "Lily带你读好书 · 本期归纳" })
+          ]),
+          xhsAct,
+          xhsQrBlock(ep.xiaohongshuUrl)
+        ]),
+        el("li", { cls: "src-row src-row--bili" }, [
+          el("span", { cls: "src-plat src-plat--bili", text: "B 站" }),
+          el("div", { cls: "src-main" }, [
+            el("div", { cls: "src-title", text: "中字回放" }),
+            el("div", {
+              cls: "src-sub",
+              text: replays.length
+                ? ("粉丝字幕组搬运 · " + replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、") + "（非官方来源）")
+                : "暂未收录"
+            })
+          ]),
+          biliAct
+        ])
+      ])
     ]));
 
     // 相关书籍
@@ -923,13 +1057,16 @@
     }
 
     var linkActions = [];
-    var xxl = externalBtn("查看带读笔记 ↗", book.xiaohongshuUrl, "primary small");
-    if (xxl) linkActions.push(xxl);
+    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl, "在小红书看带读笔记 ↗");
+    if (xhsNodes.length) xhsNodes.forEach(function (n) { linkActions.push(n); });
     else if (book.xiaohongshuNoteTitle) linkActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
     else linkActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
 
     var db = externalBtn("查看豆瓣书籍页面 ↗", book.doubanUrl, "ghost small");
     if (db) linkActions.push(db);
+
+    var xhsQr = xhsQrBlock(book.xiaohongshuUrl);
+    if (xhsQr) linkActions.push(xhsQr);
 
     /* 中文译本：主版本 + 其他译本，只列出来 */
     var ce = book.chineseEdition || {};
@@ -1022,13 +1159,16 @@
     root.appendChild(epPanel);
 
     var actions = [];
-    var xxl = externalBtn("查看带读笔记 ↗", m.xiaohongshuUrl, "primary small");
-    if (xxl) actions.push(xxl);
+    var xhsNodes = xhsLinkNodes(m.xiaohongshuUrl, "在小红书看带读笔记 ↗");
+    if (xhsNodes.length) xhsNodes.forEach(function (n) { actions.push(n); });
     else if (m.xiaohongshuNoteTitle) actions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
     else actions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
 
     var db = externalBtn("查看豆瓣影片页面 ↗", m.doubanUrl, "ghost small");
     if (db) actions.push(db); else actions.push(el("span", { cls: "missing", text: "豆瓣链接：暂未填写" }));
+
+    var xhsQr = xhsQrBlock(m.xiaohongshuUrl);
+    if (xhsQr) actions.push(xhsQr);
 
     root.appendChild(el("section", { cls: "panel" }, [
       el("h2", { text: "链接" }),

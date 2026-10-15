@@ -38,11 +38,13 @@ lltp-archive/
 ├── script.js           渲染 / 搜索 / 筛选 / 交互
 ├── validate-data.js    数据校验脚本（node validate-data.js）
 ├── gen-seo.mjs         SEO 生成脚本（sitemap / robots / meta）
+├── gen-qr.mjs          小红书二维码生成脚本（结果写入 qr.js）
 ├── assets/
 │   ├── og-cover.png    社交分享预览图（1200×630）
 │   └── gen_og.py       分享图生成脚本
 ├── sitemap.xml         由 gen-seo.mjs 生成
 ├── robots.txt          由 gen-seo.mjs 生成
+├── qr.js               由 gen-qr.mjs 生成（小红书笔记二维码，内联 SVG）
 ├── favicon.svg
 ├── REVIEW-PACK.md      交付审核包（含源码，可交给其他 AI 审核）
 └── README.md
@@ -531,7 +533,32 @@ node gen-seo.mjs --site-url https://你的正式域名  # 配置正式域名后�
 
 ---
 
-## 21. 阶段进度
+## 21. 小红书链接的打开方式（电脑 / 手机）
+
+小红书网页版强制登录（登录墙），**直接点链接常常只到登录页**，只有手机 App 能真正打开；
+微信 / QQ / 百度等**内置浏览器还会拦截「网页跳 App」**，百度甚至会把跳转变下载——这些都是
+平台策略，静态站点绕不过去，只能尽量兜底。
+
+**手机端**（`xhsLinkNodes`）
+- 主按钮先尝试用 URL Scheme 唤起 App（`xhsdiscover://item/{笔记ID}`），1.2 秒内没唤起就自动退回网页链接。
+- 旁边给一个「复制链接」：跳转失败时，复制后到小红书 App 内粘贴也能打开。
+- 在微信 / QQ / 百度 / 微博等内置浏览器里时，按钮下方会出现提示，引导「在浏览器打开」。
+
+**电脑端**：那一行会附一张二维码，扫码用手机进 App（≥721px 显示，手机端自动隐藏）。
+
+**二维码生成**：`node gen-qr.mjs` → 写入根目录 `qr.js`（笔记 ID → 内联 SVG 的 data URI），
+页面用 `<script src="qr.js">` 引入；未生成二维码的链接不显示二维码，不影响页面。
+生成脚本依赖 `qrcode`，**只在生成阶段用**，站点自身不依赖任何库：
+
+```bash
+npm i qrcode && node gen-qr.mjs   # 数据里新增小红书链接后重新跑一次
+```
+
+**已知限制**：URL Scheme 与各浏览器行为随 App / 系统版本变化，站点侧无法保证 100% 唤起成功。
+
+---
+
+## 22. 阶段进度
 
 | 阶段 | 内容 | 状态 |
 |---|---|---|
