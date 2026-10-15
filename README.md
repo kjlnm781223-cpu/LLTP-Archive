@@ -4,7 +4,7 @@
 
 **产品定位：书籍为核心、电影轻量呈现、期数连接两者。**
 
-产品主线：**节目期数 → 相关书籍 / 电影 → 作品资料 → 对应的小红书解读。**
+产品主线：**节目期数 → 相关书籍 / 电影 → 作品资料 → 对应的小红书笔记。**
 
 这是一个**内容型资料库**，不是阅读管理应用。**完全免费**，不含付费、登录、阅读记录、评论区、数据库或任何服务端依赖。
 
@@ -14,7 +14,7 @@
 
 - 纯静态站点：HTML + CSS + 原生 JavaScript + 本地 JS 数据文件。
 - 无后端、无数据库、无账号、无支付、无构建步骤。
-- 可直接部署到腾讯云 EdgeOne Pages、GitHub Pages、Netlify、Cloudflare Pages 等任意静态托管。
+- 可部署到任意静态托管；**当前线上使用 GitHub Pages**（main 分支根目录，免备案）。
 - 所有内容都在数据文件里，改数据即可更新网站，**不需要动渲染代码**。
 
 当前收录：**28 期正片 + 2 条番外/预告**，**书籍 21 本**（核心）、**电影 14 部**（轻量索引）。
@@ -30,24 +30,27 @@ lltp-archive/
 ├── movies.html         电影索引
 ├── movie.html          电影详情（?id=movie-xxx）
 ├── 404.html            错误页（带 noindex）
+├── share-studio.html   分享卡工作台（本地工具，带 noindex）
 ├── style.css           设计系统（Token 全在 :root）
+├── share-studio.css    分享卡工作台样式
 ├── books.js            书籍数据（公共档案）
 ├── movies.js           电影数据（公共档案，结构与书籍分离）
 ├── episodes.js         期数数据 + SITE_NOTICE 公告 + SERIES_NOTES 合集笔记
+├── qr.js               由 gen-qr.mjs 生成（小红书笔记二维码，内联 SVG）
 ├── reading-status.js   个人阅读标记存储模块（阶段 4 预留，暂无 UI）
 ├── script.js           渲染 / 搜索 / 筛选 / 交互
+├── share-studio.js     分享卡工作台脚本（导出 PNG / SVG）
 ├── validate-data.js    数据校验脚本（node validate-data.js）
+├── test-reading-status.js  阅读标记模块测试（node test-reading-status.js）
 ├── gen-seo.mjs         SEO 生成脚本（sitemap / robots / meta）
 ├── gen-qr.mjs          小红书二维码生成脚本（结果写入 qr.js）
 ├── assets/
-│   ├── og-cover.png    社交分享预览图（1200×630）
-│   └── gen_og.py       分享图生成脚本
+│   └── og-cover.png    社交分享预览图（1200×630）
 ├── sitemap.xml         由 gen-seo.mjs 生成
 ├── robots.txt          由 gen-seo.mjs 生成
-├── qr.js               由 gen-qr.mjs 生成（小红书笔记二维码，内联 SVG）
 ├── favicon.svg
-├── REVIEW-PACK.md      交付审核包（含源码，可交给其他 AI 审核）
-└── README.md
+├── SHARE-CARDS-GUIDE.md  分享卡工作台使用说明
+└── README.md           本文档（唯一维护文档）
 ```
 
 > 数据文件用 `window.BOOKS` / `window.MOVIES` / `window.EPISODES` 全局变量 + 普通 `<script>` 引入，
@@ -159,12 +162,12 @@ npx serve .
   （参考 `book-012 了不起的盖茨比`，同时属于 `episode-019` 与 `episode-guanshu`）。
 - 书籍与电影的关联**分开维护**，不要互相塞进对方的数组里。
 
-## 7. 如何设置小红书解读、官方节目和豆瓣链接
+## 7. 如何设置小红书笔记、官方节目和豆瓣链接
 
-- **小红书解读**：填 `xiaohongshuUrl`（完整 `https://` 链接）。
-  - 填了链接 → 显示按钮「查看本期小红书解读 ↗」。
-  - 没填但填了 `xiaohongshuNoteTitle` → 显示「解读已整理 · 链接待补」。
-  - 都没有 → 显示「解读暂未发布」。**不会**用 `#` 或假链接占位。
+- **小红书笔记**：填 `xiaohongshuUrl`（完整 `https://` 链接）。
+  - 填了链接 → 显示按钮「复制链接去小红书」（点击即复制，成功时短暂变为「已复制 · 去小红书打开」），电脑端另附二维码。
+  - 没填但填了 `xiaohongshuNoteTitle` → 期数页显示「已整理 · 链接待补」，书籍 / 电影页显示「笔记已整理 · 链接待补」。
+  - 都没有 → 期数页显示「暂未发布」，书籍 / 电影页显示「带读笔记：暂未发布」。**不会**用 `#` 或假链接占位。
 - **官方节目来源**：`episodes.js` 对应期的 `officialUrl`，留空即隐藏按钮并提示缺失。
 - **豆瓣链接**：书籍填 `books.js` 的 `doubanUrl`（`book.douban.com`），电影填 `movies.js` 的 `doubanUrl`（`movie.douban.com`）。
 
@@ -205,7 +208,7 @@ window.SERIES_NOTES = [
 ];
 ```
 
-它会出现在首页「小红书解读」区块，按钮文案为「查看小红书笔记 ↗」。
+它会出现在首页「01 · 精选」区块，卡片上的按钮与其它笔记一致（「复制链接去小红书」）。
 若某篇笔记已由期数条目展示，作品条目不会重复出现同一条（按 URL 去重）。
 
 ## 8. 如何核实与维护电影资料
@@ -240,16 +243,24 @@ window.SERIES_NOTES = [
 
 **没有把握就标 `needs-review`，不要标 `confirmed`。**
 
-## 11. 如何部署到 EdgeOne Pages
+## 11. 如何部署到 GitHub Pages
 
-1. 把整个 `lltp-archive/` 目录（含全部文件）上传为一个仓库，或直接上传 ZIP 包。
-2. 在 EdgeOne Pages 新建项目 → 选择「静态站点 / 直接上传」。
-3. 部署配置：
-   - **构建命令：留空（无需构建）**
-   - **输出目录 / 发布目录：`/`（项目根目录）**
-   - **入口文件：`index.html`**
-4. 部署完成后，`/episodes.html?id=xxx`、`/book.html?id=xxx`、`/movie.html?id=xxx` 均为普通静态页，刷新不会 404。
-5. 建议在托管平台设置 **自定义 404 页面 → `404.html`**（本项目已提供）。
+- 仓库：`https://github.com/kjlnm781223-cpu/LLTP-Archive`（公开）
+- 线上：`https://kjlnm781223-cpu.github.io/LLTP-Archive/`
+- 托管：GitHub Pages，部署源 = `main` 分支根目录，**免备案**
+
+更新流程：
+
+1. 把改动的文件直接上传 / 拖到仓库根目录 → 提交（或 `git push`）。
+2. GitHub Pages 自动重建，约 1 分钟生效。
+3. 浏览器 **`Ctrl+F5` 强制刷新** —— GitHub Pages 给 JS / CSS 设了 10 分钟缓存，不强刷会看到旧版。
+4. `/episodes.html?id=xxx`、`/book.html?id=xxx`、`/movie.html?id=xxx` 均为普通静态页，刷新不会 404；
+   自定义 404 页面已提供（`404.html`）。
+
+> 站点全部使用**相对路径**，因此能放在 `/LLTP-Archive/` 这种子路径下。
+> 未购买自定义域名；未接入访问统计；未向搜索引擎提交 sitemap。
+>
+> 部署史：最初试过腾讯云 EdgeOne Pages，但其「全球（不含中国大陆）」区域在大陆访问一律 401，已放弃，改用 GitHub Pages。
 
 ## 12. 如何更新网站内容
 
@@ -263,7 +274,7 @@ window.SERIES_NOTES = [
 
 **当前限制**：
 
-- **官方节目来源为空**：没有可核实来源，页面显示明确缺失提示，不伪造。豆瓣链接（36/37 条）与小红书解读（12 条记录 / 3 篇笔记）已填。
+- **官方节目来源为空**：没有可核实来源，页面显示明确缺失提示，不伪造。豆瓣链接（35/35 条）与小红书笔记（10 条作品 / 期数记录 + 1 条系列总览，共 3 篇笔记）已填。
 - **封面为自动生成**：尚未放入真实封面图。
 - **部分数据待核对**：番外「逛书架」中《密林勿近》《我存在》等书目的译名尚未完全核实，标记为「待核对」。
 - **无发布日期**：未找到可靠来源，`releaseDate` 统一留空，页面如实显示「未记录」。
@@ -326,9 +337,9 @@ window.SERIES_NOTES = [
 
 ### 版面
 
-- **首页**是杂志封面式非对称布局：左侧大标题 + 英文副题 + 中文导语 + 搜索；右侧是三张**真实条目**的拼贴卡（最近三期），底部是**真实统计**（28 Episodes / 23 Books / 14 Films / 4 Notes）。
-- **章节**统一用「编号 — 英文名」小节头（`01 — Spotlight`…）+ 2px 粗线分隔，形成翻阅节奏。
-- **Spotlight 只收录已发布真实解读链接的条目**，不做热度排序、不包装成「编辑推荐」。
+- **首页**是杂志封面式非对称布局：左侧大标题 + 英文副题 + 中文导语 + 搜索；右侧是三张**真实条目**的拼贴卡（最近三期），底部是**真实统计**（28 期节目 / 21 本书籍 / 14 部电影 / 4 篇笔记·合集）。
+- **章节**统一用「编号 · 中文名」小节头（`01 · 精选`、`02 · 浏览`、`03 · 期数`…）+ 2px 粗线分隔，形成翻阅节奏。
+- **「01 · 精选」只收录已发布真实笔记链接的条目**，不做热度排序、不包装成「编辑推荐」。
 - **详情页各不相同**：书籍 = 封面 + 档案编号印章 + 作者/原文名/出版信息；电影 = 影视档案条（Year / Director / Episodes）；期数 = 期号印章 + 双栏「相关书籍 / 相关电影」。
 
 ### 设计细节（已实现）
@@ -520,11 +531,12 @@ window.ReadingStatus.version                          // 存储结构版本（�
 ## 20. SEO 与部署后检查
 
 ```bash
-node gen-seo.mjs --site-url https://你的正式域名  # 配置正式域名后生成 sitemap / robots / meta
+node gen-seo.mjs --site-url https://kjlnm781223-cpu.github.io/LLTP-Archive/  # 生成 sitemap / robots / meta
 ```
 
-- **配置正式域名后再做**：执行 `node gen-seo.mjs --site-url https://你的正式域名` 生成 sitemap、robots 与 canonical/分享 URL；未配置域名时不要生成带占位域名的 SEO 文件。
-  当前尚未部署，HTML 不含虚构 canonical/分享 URL，sitemap 暂为空；这是预部署状态，不应提交给搜索引擎。
+- **已生成**：当前线上地址为 `https://kjlnm781223-cpu.github.io/LLTP-Archive/`，执行上面的命令即可生成 sitemap、robots 与 canonical/分享 URL；**换成自定义域名后要用新域名重跑**。
+- 已上线：`sitemap.xml`（67 条 URL，覆盖首页 / 电影索引 / 全部期数 / 书籍 / 电影详情）与 `robots.txt` 随站点发布；`robots.txt` 已屏蔽 `share-studio.html`。
+- **尚未向搜索引擎提交 sitemap**（提交需配合外链才有意义）。
 - 已配置：`canonical`、`og:title / og:description / og:url / og:image`、`twitter:card`、
   分享预览图 `assets/og-cover.png`（1200×630，站点自己生成，无版权素材）。
 - `404.html` 带 `noindex`。
@@ -565,13 +577,13 @@ npm i qrcode && node gen-qr.mjs   # 数据里新增小红书链接后重新跑�
 |---|---|---|
 | 1 | 档案可信度：命名 / ID 统一、关系与授权字段区分、待核实清单 | **已完成**（第 17 节） |
 | 2 | 核心浏览体验：三个入口、书籍详情为核心页、搜索筛选、深链、移动端 | **已完成** |
-| 3 | 自动检查与上线：`validate-data.js`、sitemap / robots / meta | **脚本已完成**；线上 URL 实测需等真实域名 |
+| 3 | 自动检查与上线：`validate-data.js`、sitemap / robots / meta | **已完成**；已上线 GitHub Pages |
 | 4 | 为读物标记预留能力：数据分离、存储接口、版本化 | **接口已完成**，**前端 UI 未开发** |
 
 **尚未完成的事项（不声称已上线）**：
 
 - 阅读标记**没有任何前端按钮**，用户目前无法在页面上标记
-- 尚未配置正式域名；当前不生成带占位域名的 canonical、OG URL 或 sitemap 地址
+- 未配置自定义域名；`canonical`、OG URL、`sitemap.xml` / `robots.txt` 均使用 GitHub Pages 地址（`https://kjlnm781223-cpu.github.io/LLTP-Archive/`）
 - 详情页无法按条目生成独立分享预览
 - 中字回放只覆盖 15 / 28 期；其余期数无中字来源
 - `releaseDate`、官方来源链接仍为空（无可核实来源）
