@@ -464,7 +464,8 @@
         el("p", { text: it.note || "笔记已发布。" }),
         el("div", { cls: "sp-foot" },
           xhsLinkNodes(it.url).concat([
-            it.href ? el("a", { cls: "btn ghost small", href: it.href, text: "查看档案" }) : null
+            it.href ? el("a", { cls: "btn ghost small", href: it.href, text: "查看档案" }) : null,
+            xhsQrBlock(it.url)
           ])
         )
       ]);

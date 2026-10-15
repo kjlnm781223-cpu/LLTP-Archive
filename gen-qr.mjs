@@ -4,8 +4,8 @@ import vm from "node:vm";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
-/* 把 books / movies / episodes 里出现的每个小红书链接生成二维码，
-   内联进根目录的 qr.js（笔记ID → SVG 的 data URI）。
+/* 把 books / movies / episodes 的 xiaohongshuUrl，以及 SERIES_NOTES 的 url
+   里出现的每个小红书链接生成二维码，内联进根目录的 qr.js（笔记ID → SVG 的 data URI）。
    页面在电脑端会显示二维码，方便手机扫码打开 —— 小红书电脑网页会强制
    登录，只有手机 App 能直接打开。
 
@@ -30,11 +30,14 @@ const sandbox = { window: {} };
 vm.createContext(sandbox);
 ["books.js", "movies.js", "episodes.js"].forEach((f) =>
   vm.runInContext(read(f), sandbox, { filename: f }));
-const { BOOKS = [], MOVIES = [], EPISODES = [] } = sandbox.window;
+const { BOOKS = [], MOVIES = [], EPISODES = [], SERIES_NOTES = [] } = sandbox.window;
 
 const urls = new Set();
 [...BOOKS, ...MOVIES, ...EPISODES].forEach((x) => {
   if (x && typeof x.xiaohongshuUrl === "string" && x.xiaohongshuUrl) urls.add(x.xiaohongshuUrl);
+});
+SERIES_NOTES.forEach((s) => {
+  if (s && typeof s.url === "string" && s.url) urls.add(s.url);
 });
 
 const map = {};
