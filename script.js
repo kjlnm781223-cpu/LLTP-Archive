@@ -504,10 +504,11 @@
         el("h3", {}, [it.href ? el("a", { href: it.href, text: it.title || "" }) : el("span", { text: it.title || "" })]),
         it.orig ? el("div", { cls: "sp-orig", text: it.orig }) : null,
         el("p", { text: it.note || "笔记已发布。" }),
-        el("div", { cls: "sp-foot" }, [
-          externalBtn(it.kind === "note" ? "阅读笔记 ↗" : "阅读合集 ↗", it.url, "primary small"),
-          it.href ? el("a", { cls: "btn ghost small", href: it.href, text: "查看档案" }) : null
-        ])
+        el("div", { cls: "sp-foot" },
+          xhsLinkNodes(it.url, it.kind === "note" ? "阅读笔记 ↗" : "阅读合集 ↗").concat([
+            it.href ? el("a", { cls: "btn ghost small", href: it.href, text: "查看档案" }) : null
+          ])
+        )
       ]);
       host.appendChild(card);
     });
@@ -949,7 +950,7 @@
             el("div", {
               cls: "src-sub",
               text: replays.length
-                ? ("粉丝字幕组搬运 · " + replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、") + "（非官方来源）")
+                ? ("粉丝字幕组搬运 · " + replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、"))
                 : "暂未收录"
             })
           ]),
