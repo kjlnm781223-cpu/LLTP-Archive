@@ -203,6 +203,15 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
   max-width: var(--wrap); margin: 0 auto; padding: 12px var(--gut);
   display: flex; align-items: center; gap: var(--sp-3);
 }
+.mh-back {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; margin-right: 8px; flex: none;
+  font-family: var(--font-mono); font-size: 15px; line-height: 1;
+  text-decoration: none; color: var(--ink-2);
+  border: var(--hair) solid var(--rule); border-radius: var(--radius);
+  transition: color var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.mh-back:hover { color: var(--paper); background: var(--ink); border-color: var(--ink); }
 .mh-brand { display: flex; align-items: baseline; gap: 8px; text-decoration: none; }
 .mh-brand .bf { font-family: var(--font-serif); font-size: 20px; font-weight: 700; letter-spacing: .02em; }
 .mh-brand .bl {

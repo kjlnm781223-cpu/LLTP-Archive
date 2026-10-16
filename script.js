@@ -334,6 +334,19 @@
     });
   }
 
+  /* ---------------- 左上角回退键 ----------------
+     各页导航栏最左是静态的 <a class="mh-back" href="index.html">←</a>（无 JS 也能回首页）。
+     这里只做增强：来源是同站时改为历史回退（保留来路），直接打开 / 外链来源仍回首页。 */
+  function initBack() {
+    var btn = document.querySelector(".mh-back");
+    if (!btn) return;
+    var ref = document.referrer || "";
+    if (ref.indexOf(location.origin) !== 0) return;   // 非站内来源 → 保持 href 回首页
+    btn.addEventListener("click", function (e) {
+      if (window.history.length > 1) { e.preventDefault(); window.history.back(); }
+    });
+  }
+
   /* ---------------- 档案编号 ---------------- */
 
   function pad(n) { return (n < 10 ? "0" : "") + n; }
@@ -1162,6 +1175,7 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
+    initBack();
     renderNotice();
     var page = document.body.getAttribute("data-page");
     if (page === "home") renderHome();
