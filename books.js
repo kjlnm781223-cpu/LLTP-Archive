@@ -211,8 +211,8 @@ window.BOOKS = [
       { label: "本站《火星救援》小红书解读整理稿", url: "" },
       { label: "豆瓣条目页", url: "https://book.douban.com/subject/26586492/" }
     ],
-    xiaohongshuUrl: "",
-    xiaohongshuNoteTitle: "火星救援，她第一次读打了五星，第二次开始犹豫",
+    xiaohongshuUrl: "https://www.xiaohongshu.com/explore/6ad24a09000000000a02477b",
+    xiaohongshuNoteTitle: "是什么让深爱土豆之人如此伤心？",
     lastVerified: "2026-10-15",
     lastUpdated: "",
     note: "",
