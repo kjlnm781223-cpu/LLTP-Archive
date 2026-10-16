@@ -1132,10 +1132,9 @@
     root.appendChild(epPanel);
 
     var actions = [];
+    /* 电影不做带读笔记，因而不放「暂未发布 / 链接待补」这类占位；仅当确有链接时才显示。 */
     var xhsNodes = xhsLinkNodes(m.xiaohongshuUrl);
     if (xhsNodes.length) xhsNodes.forEach(function (n) { actions.push(n); });
-    else if (m.xiaohongshuNoteTitle) actions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
-    else actions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
 
     var db = externalBtn("查看豆瓣影片页面 ↗", m.doubanUrl, "ghost small");
     if (db) actions.push(db); else actions.push(el("span", { cls: "missing", text: "豆瓣链接：暂未填写" }));
