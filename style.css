@@ -719,6 +719,10 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
   font-size: var(--fs-meta); color: var(--ink-4); line-height: 1.8;
 }
 .foot-note strong { color: var(--ink-3); }
+.foot-stat {
+  margin-top: var(--sp-2); font-family: var(--font-mono);
+  font-size: var(--fs-meta); letter-spacing: .1em; color: var(--ink-4);
+}
 
 /* ---------------------------- 11. Responsive ---------------------------- */
 @media (max-width: 1000px) {
