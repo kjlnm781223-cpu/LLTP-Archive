@@ -177,10 +177,8 @@
     document.body.removeChild(ta);
   }
 
-  /* 小红书链接：点按钮＝复制链接，再到小红书 App 里打开。
-     小红书网页版强制登录、内置浏览器又会拦截跳转，复制是最稳的方式；
-     电脑端另给二维码（见 xhsQrBlock）。
-     url 为空时返回空数组，调用方自行回退到「暂未发布」文案。 */
+  /* 小红书链接：手机端优先尝试 App 深度链接，失败后回退 HTTPS；同时保留复制入口。
+     电脑端使用复制链接与二维码。url 为空时返回空数组，调用方自行处理空状态。 */
   /* 从标准小红书笔记网页链接中提取 note ID，供 App 深度链接使用。 */
   function xhsNoteId(url) {
     var u = safeUrl(url);
@@ -196,7 +194,10 @@
   }
 
   function isMobileDevice() {
-    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+    var ua = navigator.userAgent || "";
+    // iPadOS 的「请求桌面网站」可能使用 Macintosh UA，补充触控点判断。
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) ||
+      (/Macintosh|Mac OS X/i.test(ua) && (navigator.maxTouchPoints || 0) > 1);
   }
 
   /* 移动端优先尝试小红书公开深度链接；若未能切换到 App，再退回 HTTPS 笔记地址。
