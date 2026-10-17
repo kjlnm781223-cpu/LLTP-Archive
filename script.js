@@ -915,51 +915,65 @@
       officialBtn ? el("div", { cls: "actions", attrs: { style: "margin-top:12px" } }, [officialBtn]) : null
     ]));
 
-    /* 中字回放（B 站）与带读笔记（小红书）：只显示真实存在的内容。
-       两者都没有时整块隐藏；单个子模块为空时该行隐藏。 */
+    /* 中字回放（B 站）与带读笔记（小红书）按内容类型分别展示：
+       - 观影期：只有「中字回放」，不出现带读笔记；
+       - 读书期：带读笔记行始终保留（无链接时明确标「暂未发布」），回放行按需；
+       - 番外 / 预告：保留原有「有内容才显示该行」的逻辑。 */
     var replays = (ep.replays || []).filter(function (r) { return safeUrl(r.url); });
+    var isMovieEp = ep.kind === "movie";
     var hasNote = !!safeUrl(ep.xiaohongshuUrl) || !!ep.xiaohongshuNoteTitle;
     var srcRows = [];
 
-    if (hasNote) {
-      var xhsAct = el("div", { cls: "src-act" });
-      var xhsNodes = xhsLinkNodes(ep.xiaohongshuUrl);
-      if (xhsNodes.length) xhsNodes.forEach(function (n) { xhsAct.appendChild(n); });
-      else xhsAct.appendChild(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
-      srcRows.push(el("li", { cls: "src-row src-row--xhs" }, [
+    function buildNoteRow() {
+      var act = el("div", { cls: "src-act" });
+      var nodes = xhsLinkNodes(ep.xiaohongshuUrl);
+      if (nodes.length) nodes.forEach(function (n) { act.appendChild(n); });
+      else if (ep.xiaohongshuNoteTitle) act.appendChild(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
+      else act.appendChild(el("span", { cls: "missing", text: "暂未发布" }));
+      return el("li", { cls: "src-row src-row--xhs" }, [
         el("span", { cls: "src-plat src-plat--xhs", text: "小红书" }),
         el("div", { cls: "src-main" }, [
           el("div", { cls: "src-title", text: "带读笔记" }),
           el("div", { cls: "src-sub", text: ep.xiaohongshuNoteTitle || "Lily带你读好书 · 本期归纳" })
         ]),
-        xhsAct,
+        act,
         xhsQrBlock(ep.xiaohongshuUrl)
-      ]));
+      ]);
     }
 
-    if (replays.length) {
-      var biliAct = el("div", { cls: "src-act" });
+    function buildReplayRow() {
+      var act = el("div", { cls: "src-act" });
       replays.forEach(function (r) {
-        biliAct.appendChild(el("a", {
+        act.appendChild(el("a", {
           cls: "btn ghost small",
           href: safeUrl(r.url),
           text: (r.by || "粉丝字幕组") + " ↗",
           attrs: { target: "_blank", rel: "noopener noreferrer" }
         }));
       });
-      srcRows.push(el("li", { cls: "src-row src-row--bili" }, [
+      return el("li", { cls: "src-row src-row--bili" }, [
         el("span", { cls: "src-plat src-plat--bili", text: "B 站" }),
         el("div", { cls: "src-main" }, [
           el("div", { cls: "src-title", text: "中字回放" }),
           el("div", { cls: "src-sub", text: replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、") })
         ]),
-        biliAct
-      ]));
+        act
+      ]);
+    }
+
+    if (isMovieEp) {
+      if (replays.length) srcRows.push(buildReplayRow());
+    } else if (ep.kind === "book") {
+      srcRows.push(buildNoteRow());
+      if (replays.length) srcRows.push(buildReplayRow());
+    } else {
+      if (hasNote) srcRows.push(buildNoteRow());
+      if (replays.length) srcRows.push(buildReplayRow());
     }
 
     if (srcRows.length) {
       root.appendChild(el("section", { cls: "panel" }, [
-        el("h2", { text: "中字回放与带读笔记" }),
+        el("h2", { text: isMovieEp ? "中字回放" : "中字回放与带读笔记" }),
         el("ul", { cls: "src-list" }, srcRows)
       ]));
     }
