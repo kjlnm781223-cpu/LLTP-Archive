@@ -608,6 +608,7 @@ window.EPISODES = [
     title: "第 29 期预告 · 弗兰肯斯坦",
     englishTitle: "Frankenstein",
     kind: "extra",
+    preview: true,          // 预告：笔记只在预告详情页显示，不进首页「精选」
     releaseDate: "",
     summary: "第 29 期预告，介绍玛丽·雪莱《弗兰肯斯坦》及中文译本参考（整理自站点整理图）。",
     note: "第 29 期预告，正片播出后更新。",

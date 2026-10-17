@@ -439,6 +439,7 @@
     host.textContent = "";
     var items = [];
     EPISODES.forEach(function (e) {
+      if (e.preview) return;   // 预告笔记只在预告详情页显示，不进精选
       if (safeUrl(e.xiaohongshuUrl)) {
         items.push({
           kind: e.noteKind || "note",
@@ -665,6 +666,7 @@
   function collectNotes() {
     var notes = [];
     EPISODES.forEach(function (e) {
+      if (e.preview) return;   // 预告笔记不计入精选统计
       if (e.xiaohongshuNoteTitle || e.xiaohongshuUrl) {
         var subjects = (e.bookIds || []).map(function (id) { var b = byId(BOOKS, id); return b ? b.title : ""; })
           .concat((e.movieIds || []).map(function (id) { var m = byId(MOVIES, id); return m ? m.title : ""; }))
@@ -675,9 +677,10 @@
         });
       }
     });
-    // 作品级：若这篇笔记已由「期数级」条目展示过，就不重复出现
+    // 作品级：若这篇笔记已由「期数级」条目展示过，就不重复出现。
+    // 预告虽不进精选，但它已持有该链接，对应书籍不应再补位出现。
     var seenUrl = {};
-    notes.forEach(function (n) { if (n.url) seenUrl[n.url] = true; });
+    EPISODES.forEach(function (e) { if (e.xiaohongshuUrl) seenUrl[e.xiaohongshuUrl] = true; });
     BOOKS.concat(MOVIES).forEach(function (x) {
       if ((x.xiaohongshuNoteTitle || x.xiaohongshuUrl) && !seenUrl[x.xiaohongshuUrl]) {
         notes.push({
