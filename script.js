@@ -187,8 +187,8 @@
     if (!u) return "";
     try {
       var parsed = new URL(u);
-      if (!/(^|\\.)xiaohongshu\\.com$/i.test(parsed.hostname)) return "";
-      var match = parsed.pathname.match(/\\/explore\\/([0-9a-f]{16,})(?:\\/|$)/i);
+      if (!/(^|\.)xiaohongshu\.com$/i.test(parsed.hostname)) return "";
+      var match = parsed.pathname.match(/\/explore\/([0-9a-f]{16,})(?:\/|$)/i);
       return match ? match[1] : "";
     } catch (e) {
       return "";
@@ -202,9 +202,8 @@
   /* 移动端优先尝试小红书公开深度链接；若未能切换到 App，再退回 HTTPS 笔记地址。
      切到 App 时通常会触发 visibilitychange/pagehide；未触发则认为唤起失败。 */
   function openXhsNote(url, noteId, noteType, btn) {
-    var route = noteType === "video" ? "video_feed"
-      : noteType === "long" ? "multi_note" : "item";
-    var deepLink = "xhsdiscover://" + route + "/" + encodeURIComponent(noteId);
+    var type = noteType === "video" ? "vedio" : noteType === "long" ? "multi" : "normal";
+    var deepLink = "xhsdiscover://item/" + encodeURIComponent(noteId) + "?type=" + type;
     var leftPage = false;
     var timer = null;
 
