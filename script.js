@@ -207,30 +207,40 @@
     var deepLink = "xhsdiscover://item/" + encodeURIComponent(noteId) + "?type=" + type;
     var leftPage = false;
     var timer = null;
+    var originalLabel = btn.textContent;
 
     function cleanup() {
       if (timer !== null) window.clearTimeout(timer);
+      timer = null;
       document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("pagehide", onPageHide);
+      window.removeEventListener("pageshow", onPageShow);
     }
     function onVisibilityChange() {
       if (document.visibilityState === "hidden") {
         leftPage = true;
+        // 不要在切出网页时继续执行 HTTPS 回退；App 返回时再恢复按钮。
+        if (timer !== null) window.clearTimeout(timer);
+        timer = null;
+      } else if (leftPage) {
+        btn.textContent = originalLabel;
         cleanup();
       }
     }
-    function onPageHide() {
-      leftPage = true;
+    function onPageShow() {
+      if (leftPage) btn.textContent = originalLabel;
       cleanup();
     }
 
     document.addEventListener("visibilitychange", onVisibilityChange);
-    window.addEventListener("pagehide", onPageHide);
+    window.addEventListener("pageshow", onPageShow);
     btn.textContent = "正在打开小红书…";
     timer = window.setTimeout(function () {
+      if (leftPage || document.visibilityState === "hidden") {
+        cleanup();
+        return;
+      }
       cleanup();
-      if (leftPage || document.visibilityState === "hidden") return;
-      // 回退到笔记 HTTPS 地址：系统可能仍会按 Universal Link 唤起 App；否则至少打开网页版本。
+      // 回退到 HTTPS 笔记地址：系统可能仍会按 Universal Link 唤起 App；否则至少打开网页版本。
       window.location.href = url;
     }, 1600);
 
