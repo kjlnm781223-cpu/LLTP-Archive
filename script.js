@@ -50,9 +50,11 @@
     return h % 6;
   }
 
-  function kindBadge(kind) {
-    var t = kind === "movie" ? "观影期" : kind === "extra" ? "番外" : "读书期";
-    return el("span", { cls: "badge kind-" + kind, text: t });
+  /* 期数类型徽标：内容类型（读书期 / 观影期 / 番外）与发布状态（预告）分开表达 */
+  function epTypeBadge(ep) {
+    var t = ep.preview ? "预告" : (ep.kind === "movie" ? "观影期" : ep.kind === "extra" ? "番外" : "读书期");
+    var cls = ep.preview ? "kind-preview" : "kind-" + ep.kind;
+    return el("span", { cls: "badge " + cls, text: t });
   }
 
   function byId(arr, id) {
@@ -242,7 +244,8 @@
 
   /* ---------------- 卡片 ---------------- */
 
-  function bookCard(book) {
+  function bookCard(book, opts) {
+    opts = opts || {};
     return el("a", { cls: "book-card", href: "book.html?id=" + encodeURIComponent(book.id) }, [
       coverEl(book),
       el("div", { cls: "book-body" }, [
@@ -251,7 +254,8 @@
         el("div", { cls: "b-tags" }, (book.tags || []).slice(0, 3).map(function (t) {
           return el("span", { cls: "badge", text: t });
         })),
-        el("div", { cls: "b-foot" }, [
+        /* 期数详情页里不需要再强调「属于哪一期」 */
+        opts.hideEpisodes ? null : el("div", { cls: "b-foot" }, [
           el("span", { cls: "b-eps", text: episodeIdsText(book) })
         ])
       ])
@@ -269,12 +273,14 @@
   }
 
   // 电影：轻量行式卡片（不做与书籍同等的卡片体系）
-  function movieCard(m) {
+  function movieCard(m, opts) {
+    opts = opts || {};
     var eps = (m.episodeIds || []).map(function (id) { return byId(EPISODES, id); }).filter(Boolean);
     var metaBits = [];
     if (m.year) metaBits.push(String(m.year));
     if (m.director) metaBits.push(m.director);
-    metaBits.push(eps.length ? eps.map(epShort).join(" · ") : "期数待补");
+    /* 期数详情页里不需要再强调「属于哪一期」 */
+    if (!opts.hideEpisodes) metaBits.push(eps.length ? eps.map(epShort).join(" · ") : "期数待补");
     return el("a", { cls: "movie-card", href: "movie.html?id=" + encodeURIComponent(m.id) }, [
       el("div", { cls: "m-poster cover tint-" + tintOf(m.id) }, [
         el("span", { cls: "cv-kind", text: "电影" }),
@@ -307,7 +313,7 @@
       el("div", { cls: "ep-no", text: epNo(ep) }),
       el("div", { cls: "ep-title", text: ep.title || "未命名期数" }),
       el("div", { cls: "ep-meta" }, [
-        kindBadge(ep.kind),
+        epTypeBadge(ep),
         el("span", { text: bits.length ? ("关联 " + bits.join(" + ")) : "作品待补" }),
         ep.xiaohongshuNoteTitle ? el("span", { cls: "badge draft", text: "有带读笔记" }) : null
       ])
@@ -372,8 +378,7 @@
       numbered.concat(extras).forEach(function (ep) { epGrid.appendChild(episodeCard(ep)); });
     }
 
-    initFilters();
-    renderBookGroups();
+    initFilters();   // 内部同时渲染卡片与分组视图，保证两者使用同一份筛选结果
     initBookView();
     renderEpisodeTable();
     initEpisodeView();
@@ -497,13 +502,17 @@
     if (!grid) return;
 
     if (fEp) {
-      EPISODES.slice().sort(function (a, b) {
-        var an = a.episodeNumber == null ? 999 : a.episodeNumber;
-        var bn = b.episodeNumber == null ? 999 : b.episodeNumber;
-        return an - bn;
-      }).forEach(function (e) {
-        fEp.appendChild(el("option", { text: epLabel(e), attrs: { value: e.id } }));
-      });
+      /* 只列出确实关联了书籍的期数，避免纯观影期被选中后得到空结果 */
+      var bookEpIds = {};
+      BOOKS.forEach(function (b) { (b.episodeIds || []).forEach(function (id) { bookEpIds[id] = true; }); });
+      EPISODES.filter(function (e) { return bookEpIds[e.id]; })
+        .sort(function (a, b) {
+          var an = a.episodeNumber == null ? 999 : a.episodeNumber;
+          var bn = b.episodeNumber == null ? 999 : b.episodeNumber;
+          return an - bn;
+        }).forEach(function (e) {
+          fEp.appendChild(el("option", { text: epLabel(e), attrs: { value: e.id } }));
+        });
     }
     if (fTag) {
       var tagSet = {};
@@ -522,9 +531,11 @@
         if (epSel && (b.episodeIds || []).indexOf(epSel) === -1) return false;
         if (tagSel && (b.tags || []).indexOf(tagSel) === -1) return false;
         if (cnSel) {
-          var has = b.chineseEdition ? b.chineseEdition.hasSimplifiedChinese : null;
+          var raw = b.chineseEdition ? b.chineseEdition.hasSimplifiedChinese : null;
+          var has = typeof raw === "boolean" ? raw : null;   // true / false / null（待确认）
           if (cnSel === "yes" && has !== true) return false;
-          if (cnSel === "no" && has === true) return false;
+          if (cnSel === "no" && has !== false) return false;
+          if (cnSel === "unknown" && has !== null) return false;
         }
         return true;
       });
@@ -538,6 +549,7 @@
       } else {
         out.forEach(function (b) { grid.appendChild(bookCard(b)); });
       }
+      renderBookGroups(out);   // 分组视图与卡片共用同一份筛选结果
       if (countNote) {
         countNote.textContent = "共 " + out.length + " 本书" +
           (out.length !== BOOKS.length ? "（已从 " + BOOKS.length + " 本中筛选）" : "");
@@ -576,7 +588,7 @@
           text: e.title || "—"
         })]),
         el("td", { cls: "col-orig", text: (w && w.originalTitle) || (e.englishTitle || "—") }),
-        el("td", {}, [kindBadge(e.kind)])
+        el("td", {}, [epTypeBadge(e)])
       ]);
     }));
 
@@ -635,29 +647,43 @@
     return "其他";
   }
 
-  function renderBookGroups() {
+  function renderBookGroups(books) {
     var host = document.getElementById("bookGroups");
     if (!host) return;
+    var list = books || BOOKS;
     host.textContent = "";
     BOOK_GROUPS.forEach(function (g) {
-      var list = BOOKS.filter(function (b) { return groupOfBook(b) === g.name; });
-      if (!list.length) return;
+      var items = list.filter(function (b) { return groupOfBook(b) === g.name; });
+      if (!items.length) return;
       host.appendChild(el("section", { cls: "book-group" }, [
         el("h3", { cls: "bg-title" }, [
           el("span", { text: g.name }),
-          el("span", { cls: "bg-count", text: list.length + " 本" })
+          el("span", { cls: "bg-count", text: items.length + " 本" })
         ]),
-        el("div", { cls: "book-grid" }, list.map(bookCard))
+        el("div", { cls: "book-grid" }, items.map(function (b) { return bookCard(b); }))
       ]));
     });
   }
 
-  // 首页「电影索引」：轻量预览
+  // 首页「电影索引」：轻量预览。固定排序 = 关联期数从新到旧，同期数再按片名。
+  function movieEpNumber(m) {
+    var nums = (m.episodeIds || []).map(function (id) {
+      var e = byId(EPISODES, id);
+      return e && e.episodeNumber != null ? e.episodeNumber : null;
+    }).filter(function (n) { return n != null; });
+    return nums.length ? Math.min.apply(null, nums) : 0;
+  }
+
   function renderMovieIndex() {
     var host = document.getElementById("movieIndex");
     if (!host) return;
     var limit = parseInt(host.getAttribute("data-limit") || "0", 10);
-    var list = limit > 0 ? MOVIES.slice(0, limit) : MOVIES;
+    var sorted = MOVIES.slice().sort(function (a, b) {
+      var d = movieEpNumber(b) - movieEpNumber(a);
+      if (d !== 0) return d;
+      return String(a.title || "").localeCompare(String(b.title || ""), "zh-Hans-CN");
+    });
+    var list = limit > 0 ? sorted.slice(0, limit) : sorted;
     host.textContent = "";
     list.forEach(function (m) { host.appendChild(movieCard(m)); });
   }
@@ -864,7 +890,7 @@
       return;
     }
 
-    document.title = epShort(ep) + " · " + ep.title + " · LLTP Archive";
+    document.title = (ep.episodeNumber != null ? epShort(ep) + " · " : "") + ep.title + " · LLTP Archive";
 
     root.appendChild(el("nav", { cls: "breadcrumb" }, [
       el("a", { href: "index.html", text: "首页" }),
@@ -872,16 +898,21 @@
       el("span", { text: epShort(ep) })
     ]));
 
+    /* 官方节目来源：只有填了有效链接时才出现，绝不凭猜测补 */
+    var officialBtn = externalBtn("官方节目 ↗", ep.officialUrl, "ghost small");
+
     root.appendChild(el("div", { cls: "detail-info" }, [
       el("span", { cls: "archive-no archive-no--stamp", text: epNo(ep) }),
       el("h1", { text: ep.title }),
       ep.englishTitle ? el("div", { cls: "orig", text: ep.englishTitle }) : null,
       el("div", { cls: "meta-row" }, [
-        kindBadge(ep.kind),
-        ep.episodeNumber != null ? el("span", { cls: "badge", text: "第 " + ep.episodeNumber + " 期" }) : el("span", { cls: "badge", text: "番外 / 特辑" })
+        epTypeBadge(ep),
+        ep.episodeNumber != null ? el("span", { cls: "badge", text: "第 " + ep.episodeNumber + " 期" })
+          : el("span", { cls: "badge", text: ep.preview ? "正片待发布" : "番外 / 特辑" })
       ]),
       ep.summary ? el("p", { cls: "summary", text: ep.summary }) : null,
-      ep.note ? el("p", { cls: "note-line", text: "注：" + ep.note }) : null
+      ep.note ? el("p", { cls: "note-line", text: "注：" + ep.note }) : null,
+      officialBtn ? el("div", { cls: "actions", attrs: { style: "margin-top:12px" } }, [officialBtn]) : null
     ]));
 
     /* 中字回放（B 站）与带读笔记（小红书）分成两行，平台一眼可辨 */
@@ -934,35 +965,39 @@
       ])
     ]));
 
-    // 相关书籍
+    // 本期作品：只渲染实际存在的类别，不生成空面板、不解释「另一类为什么没有」
     var books = (ep.bookIds || []).map(function (x) { return byId(BOOKS, x); }).filter(Boolean);
-    var bSec = el("section", { cls: "panel" }, [el("h2", { text: "相关书籍" })]);
-    if (books.length) {
-      var bg = el("div", { cls: "book-grid" });
-      books.forEach(function (b) { bg.appendChild(bookCard(b)); });
-      bSec.appendChild(bg);
-    } else {
-      bSec.appendChild(el("div", { cls: "empty" }, [
-        el("div", { cls: "big", text: "本期没有关联书籍" }),
-        el("div", { text: ep.kind === "movie" ? "这一期是观影期。" : "书籍尚未核实到具体条目。" })
-      ]));
-    }
-    root.appendChild(bSec);
-
-    // 相关电影
     var movies = (ep.movieIds || []).map(function (x) { return byId(MOVIES, x); }).filter(Boolean);
-    var mSec = el("section", { cls: "panel" }, [el("h2", { text: "相关电影" })]);
+
+    if (books.length) {
+      var bSec = el("section", { cls: "panel" }, [
+        el("h2", { text: ep.preview ? "预告书目" : "本期讨论书籍" })
+      ]);
+      var bg = el("div", { cls: "book-grid" });
+      books.forEach(function (b) { bg.appendChild(bookCard(b, { hideEpisodes: true })); });
+      bSec.appendChild(bg);
+      root.appendChild(bSec);
+    }
+
     if (movies.length) {
+      var mSec = el("section", { cls: "panel" }, [
+        el("h2", { text: ep.preview ? "预告影片" : "本期讨论电影" })
+      ]);
       var mg = el("div", { cls: "movie-list" });
-      movies.forEach(function (m) { mg.appendChild(movieCard(m)); });
+      movies.forEach(function (m) { mg.appendChild(movieCard(m, { hideEpisodes: true })); });
       mSec.appendChild(mg);
-    } else {
-      mSec.appendChild(el("div", { cls: "empty" }, [
-        el("div", { cls: "big", text: "本期没有关联电影" }),
-        el("div", { text: ep.kind === "book" ? "这一期是读书期。" : "电影尚未核实到具体条目。" })
+      root.appendChild(mSec);
+    }
+
+    if (!books.length && !movies.length) {
+      var hint = ep.preview
+        ? "预告期暂未公布本期作品，正片发布后更新。"
+        : (ep.kind === "extra" ? "这期番外没有单独对应的作品条目。" : "本期作品仍在整理中。");
+      root.appendChild(el("section", { cls: "panel" }, [
+        el("h2", { text: "本期作品" }),
+        el("div", { cls: "empty" }, [el("div", { text: hint })])
       ]));
     }
-    root.appendChild(mSec);
   }
 
   /* ---------------- 书籍详情 ---------------- */

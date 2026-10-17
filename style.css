@@ -173,6 +173,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
 .badge.kind-book { border-color: var(--lavender); color: #655A82; }
 .badge.kind-movie { border-color: var(--mist); color: #4E7186; }
 .badge.kind-extra { border-color: var(--rule); color: var(--ink-3); }
+.badge.kind-preview { border-color: var(--vermilion); color: var(--vermilion-d); background: rgba(228, 91, 70, .08); }
 
 /* 按钮 */
 .btn {
