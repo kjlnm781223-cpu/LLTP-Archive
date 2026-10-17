@@ -656,8 +656,8 @@ window.BOOKS = [
       { label: "LLTP 预告·弗兰肯斯坦 整理图", url: "" },
       { label: "豆瓣条目页", url: "https://book.douban.com/subject/26921825/" }
     ],
-    xiaohongshuUrl: "",
-    xiaohongshuNoteTitle: "",
+    xiaohongshuUrl: "https://www.xiaohongshu.com/explore/6ac36c2a000000000a025848",
+    xiaohongshuNoteTitle: "LLTP#29预告 《弗兰肯斯坦》",
     lastVerified: "2026-10-15",
     lastUpdated: "",
     note: "",
