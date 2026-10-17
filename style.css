@@ -313,31 +313,36 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
 .btn-mini[hidden] { display: none; }
 .search-hint { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--ink-4); margin-top: 8px; }
 
-/* 站主小红书入口（仅首页） */
-.xhs-profile-card {
-  margin-top: var(--sp-3); padding: var(--sp-2) var(--sp-3);
-  display: flex; align-items: flex-start; gap: var(--sp-3);
-  border: var(--hair) solid var(--rule); border-radius: var(--radius);
-  background: var(--card);
+/* 站主小红书入口（仅首页）：默认只是一行名字 + 小红书号，点开才展开二维码 */
+.xhs-profile { margin-top: 10px; }
+.xp-summary {
+  display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 8px;
+  padding: 2px 0; cursor: pointer; list-style: none; color: var(--ink-3);
 }
+.xp-summary::-webkit-details-marker { display: none; }
+.xp-summary::marker { content: ""; }
+.xp-name {
+  font-family: var(--font-serif); font-size: var(--fs-sm); color: var(--ink-2);
+  border-bottom: var(--hair) dotted var(--rule);
+}
+.xp-summary:hover .xp-name { color: var(--vermilion); border-bottom-color: var(--vermilion); }
+.xp-id { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--ink-4); }
+.xp-toggle { font-family: var(--font-mono); font-size: var(--fs-meta); color: var(--vermilion); }
+.xp-toggle::after { content: " +"; }
+.xhs-profile[open] .xp-toggle::after { content: " −"; }
+.xp-panel {
+  margin-top: 10px; display: flex; align-items: flex-start;
+  flex-wrap: wrap; gap: 12px;
+}
+.xhs-profile:not([open]) .xp-panel { display: none; }
 .xhs-profile-qr {
-  flex: none; display: block; line-height: 0; padding: 4px;
+  flex: none; display: block; line-height: 0; padding: 3px;
   border: var(--hair) solid var(--rule); background: #fff;
 }
-.xhs-profile-qr img { display: block; width: 96px; height: 96px; }
-.xhs-profile-info { min-width: 0; }
-.xhs-profile-card .xp-kicker {
-  font-family: var(--font-mono); font-size: var(--fs-meta);
-  letter-spacing: .16em; text-transform: uppercase; color: var(--vermilion);
-}
-.xhs-profile-card .xp-title { font-family: var(--font-serif); font-size: 1.05rem; font-weight: 600; margin-top: 2px; }
-.xhs-profile-card .xp-bio { font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
-.xhs-profile-card .xp-id { font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--ink-2); margin-top: 4px; }
+.xhs-profile-qr img { display: block; width: 80px; height: 80px; }
+.xp-side { min-width: 0; }
+.xp-bio { font-size: var(--fs-sm); color: var(--ink-3); }
 .xhs-profile-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-@media (max-width: 560px) {
-  .xhs-profile-card { flex-direction: column; }
-  .xhs-profile-qr img { width: 88px; height: 88px; }
-}
 
 /* 搜索结果下拉 */
 .search-results {
