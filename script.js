@@ -1066,18 +1066,6 @@
       ]));
     }
 
-    var linkActions = [];
-    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl);
-    if (xhsNodes.length) xhsNodes.forEach(function (n) { linkActions.push(n); });
-    else if (book.xiaohongshuNoteTitle) linkActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
-    else linkActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
-
-    var db = externalBtn("查看豆瓣书籍页面 ↗", book.doubanUrl, "ghost small");
-    if (db) linkActions.push(db);
-
-    var xhsQr = xhsQrBlock(book.xiaohongshuUrl);
-    if (xhsQr) linkActions.push(xhsQr);
-
     /* 中文译本：主版本 + 其他译本，只列出来 */
     var ce = book.chineseEdition || {};
     var edRows = [];
@@ -1093,6 +1081,22 @@
       if (u) seenUrl[u] = true;
       edRows.push({ bits: [e.publisher, e.translator, e.year ? String(e.year) : ""].filter(Boolean).join(" · "), url: u });
     });
+    var hasEditionLink = edRows.some(function (r) { return r.url; });
+
+    var linkActions = [];
+    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl);
+    if (xhsNodes.length) xhsNodes.forEach(function (n) { linkActions.push(n); });
+    else if (book.xiaohongshuNoteTitle) linkActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
+    else linkActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
+
+    /* 中文译本每一行都已带豆瓣入口时，不再重复放一个全书级豆瓣按钮 */
+    if (!hasEditionLink) {
+      var db = externalBtn("查看豆瓣书籍页面 ↗", book.doubanUrl, "ghost small");
+      if (db) linkActions.push(db);
+    }
+
+    var xhsQr = xhsQrBlock(book.xiaohongshuUrl);
+    if (xhsQr) linkActions.push(xhsQr);
 
     var panel = el("section", { cls: "panel" }, [el("h2", { text: "中文译本" })]);
     if (edRows.length) {

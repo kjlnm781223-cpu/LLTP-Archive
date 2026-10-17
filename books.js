@@ -564,7 +564,7 @@ window.BOOKS = [
     author: "泰勒·詹金斯·里德",
     cover: "",
     doubanUrl: "https://book.douban.com/subject/30355040/",
-    chineseEdition: { hasSimplifiedChinese: null, publisher: "臉譜（繁体台版）", translator: "徐彩嫦（繁体）", editionNote: "目前仅见英文原版与繁体台版（臉譜，徐彩嫦 译，2024-03）；简体版待确认", sourceUrl: "" },
+    chineseEdition: { hasSimplifiedChinese: null, publisher: "臉譜（繁体台版）", translator: "徐彩嫦（繁体）", editionNote: "目前仅见英文原版与繁体台版（臉譜，徐彩嫦 译，2024-03）；简体版待确认", sourceUrl: "https://book.douban.com/subject/36722353/" },
     episodeIds: ["episode-guanshu"],
     tags: ["音乐", "小说"],
     summary: "泰勒·詹金斯·里德的小说，以访谈形式讲述一支虚构摇滚乐队的兴衰。",
