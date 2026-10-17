@@ -201,7 +201,7 @@
   }
 
   /* 移动端优先尝试小红书公开深度链接；若未能切换到 App，再退回 HTTPS 笔记地址。
-     切到 App 时通常会触发 visibilitychange/pagehide；未触发则认为唤起失败。 */
+     切换前后台时用 visibilitychange/pageshow 处理回退计时与按钮状态。 */
   function openXhsNote(url, noteId, noteType, btn) {
     var type = noteType === "video" ? "vedio" : noteType === "long" ? "multi" : "normal";
     var deepLink = "xhsdiscover://item/" + encodeURIComponent(noteId) + "?type=" + type;
@@ -227,7 +227,8 @@
       }
     }
     function onPageShow() {
-      if (leftPage) btn.textContent = originalLabel;
+      if (!leftPage) return;
+      btn.textContent = originalLabel;
       cleanup();
     }
 
