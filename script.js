@@ -440,6 +440,15 @@
     });
   }
 
+  /* ---------------- 首页：站主小红书入口 ---------------- */
+  function initXhsProfile() {
+    var btn = document.getElementById("copyXhsProfileId");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      copyText("7737689581", btn, "已复制");
+    });
+  }
+
   /* ---------------- 档案编号 ---------------- */
 
   function pad(n) { return (n < 10 ? "0" : "") + n; }
@@ -1318,6 +1327,7 @@
   document.addEventListener("DOMContentLoaded", function () {
     initNav();
     initBack();
+    initXhsProfile();
     renderNotice();
     var page = document.body.getAttribute("data-page");
     if (page === "home") renderHome();
