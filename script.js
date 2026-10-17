@@ -361,7 +361,8 @@
   function bookNo(b) { return "书 " + pad3(parseInt(String(b.id).replace(/\D/g, ""), 10)); }
   function movieNo(m) { return "影 " + pad(parseInt(String(m.id).replace(/\D/g, ""), 10)); }
   function epNo(e) {
-    return e.episodeNumber != null ? ("第 " + e.episodeNumber + " 期") : "番外";
+    if (e.episodeNumber != null) return "第 " + e.episodeNumber + " 期";
+    return e.preview ? "预告" : "番外";
   }
 
   /* ---------------- 首页 ---------------- */
@@ -449,9 +450,8 @@
         items.push({
           kind: e.noteKind || "note",
           href: "episodes.html?id=" + encodeURIComponent(e.id),
-          no: epNo(e) + (e.englishTitle ? " · " + e.englishTitle : ""),
+          no: epNo(e),
           title: e.title,
-          orig: e.englishTitle || "",
           note: e.xiaohongshuNoteTitle,
           url: e.xiaohongshuUrl
         });
@@ -581,7 +581,7 @@
         .concat((e.movieIds || []).map(function (id) { return byId(MOVIES, id); }).filter(Boolean));
       var w = works[0];
       return el("tr", {}, [
-        el("td", { cls: "c-ep", text: e.episodeNumber != null ? ("EP " + e.episodeNumber) : "番外" }),
+        el("td", { cls: "c-ep", text: e.preview ? "预告" : (e.episodeNumber != null ? ("EP " + e.episodeNumber) : "番外") }),
         el("td", {}, [el("a", {
           cls: "c-work",
           href: "episodes.html?id=" + encodeURIComponent(e.id),
@@ -915,18 +915,30 @@
       officialBtn ? el("div", { cls: "actions", attrs: { style: "margin-top:12px" } }, [officialBtn]) : null
     ]));
 
-    /* 中字回放（B 站）与带读笔记（小红书）分成两行，平台一眼可辨 */
+    /* 中字回放（B 站）与带读笔记（小红书）：只显示真实存在的内容。
+       两者都没有时整块隐藏；单个子模块为空时该行隐藏。 */
     var replays = (ep.replays || []).filter(function (r) { return safeUrl(r.url); });
+    var hasNote = !!safeUrl(ep.xiaohongshuUrl) || !!ep.xiaohongshuNoteTitle;
+    var srcRows = [];
 
-    var xhsAct = el("div", { cls: "src-act" });
-    var xhsNodes = xhsLinkNodes(ep.xiaohongshuUrl);
-    if (xhsNodes.length) xhsNodes.forEach(function (n) { xhsAct.appendChild(n); });
-    else if (ep.xiaohongshuNoteTitle) xhsAct.appendChild(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
-    else xhsAct.appendChild(el("span", { cls: "missing", text: "暂未发布" }));
+    if (hasNote) {
+      var xhsAct = el("div", { cls: "src-act" });
+      var xhsNodes = xhsLinkNodes(ep.xiaohongshuUrl);
+      if (xhsNodes.length) xhsNodes.forEach(function (n) { xhsAct.appendChild(n); });
+      else xhsAct.appendChild(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
+      srcRows.push(el("li", { cls: "src-row src-row--xhs" }, [
+        el("span", { cls: "src-plat src-plat--xhs", text: "小红书" }),
+        el("div", { cls: "src-main" }, [
+          el("div", { cls: "src-title", text: "带读笔记" }),
+          el("div", { cls: "src-sub", text: ep.xiaohongshuNoteTitle || "Lily带你读好书 · 本期归纳" })
+        ]),
+        xhsAct,
+        xhsQrBlock(ep.xiaohongshuUrl)
+      ]));
+    }
 
-    var biliAct = null;
     if (replays.length) {
-      biliAct = el("div", { cls: "src-act" });
+      var biliAct = el("div", { cls: "src-act" });
       replays.forEach(function (r) {
         biliAct.appendChild(el("a", {
           cls: "btn ghost small",
@@ -935,35 +947,22 @@
           attrs: { target: "_blank", rel: "noopener noreferrer" }
         }));
       });
+      srcRows.push(el("li", { cls: "src-row src-row--bili" }, [
+        el("span", { cls: "src-plat src-plat--bili", text: "B 站" }),
+        el("div", { cls: "src-main" }, [
+          el("div", { cls: "src-title", text: "中字回放" }),
+          el("div", { cls: "src-sub", text: replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、") })
+        ]),
+        biliAct
+      ]));
     }
 
-    root.appendChild(el("section", { cls: "panel" }, [
-      el("h2", { text: "中字回放与带读笔记" }),
-      el("ul", { cls: "src-list" }, [
-        el("li", { cls: "src-row src-row--xhs" }, [
-          el("span", { cls: "src-plat src-plat--xhs", text: "小红书" }),
-          el("div", { cls: "src-main" }, [
-            el("div", { cls: "src-title", text: "带读笔记" }),
-            el("div", { cls: "src-sub", text: ep.xiaohongshuNoteTitle || "Lily带你读好书 · 本期归纳" })
-          ]),
-          xhsAct,
-          xhsQrBlock(ep.xiaohongshuUrl)
-        ]),
-        el("li", { cls: "src-row src-row--bili" }, [
-          el("span", { cls: "src-plat src-plat--bili", text: "B 站" }),
-          el("div", { cls: "src-main" }, [
-            el("div", { cls: "src-title", text: "中字回放" }),
-            el("div", {
-              cls: "src-sub",
-              text: replays.length
-                ? replays.map(function (r) { return r.by || "粉丝字幕组"; }).join("、")
-                : "暂未收录"
-            })
-          ]),
-          biliAct
-        ])
-      ])
-    ]));
+    if (srcRows.length) {
+      root.appendChild(el("section", { cls: "panel" }, [
+        el("h2", { text: "中字回放与带读笔记" }),
+        el("ul", { cls: "src-list" }, srcRows)
+      ]));
+    }
 
     // 本期作品：只渲染实际存在的类别，不生成空面板、不解释「另一类为什么没有」
     var books = (ep.bookIds || []).map(function (x) { return byId(BOOKS, x); }).filter(Boolean);
