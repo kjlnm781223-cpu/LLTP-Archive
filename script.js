@@ -181,18 +181,94 @@
      小红书网页版强制登录、内置浏览器又会拦截跳转，复制是最稳的方式；
      电脑端另给二维码（见 xhsQrBlock）。
      url 为空时返回空数组，调用方自行回退到「暂未发布」文案。 */
-  function xhsLinkNodes(url) {
+  /* 从标准小红书笔记网页链接中提取 note ID，供 App 深度链接使用。 */
+  function xhsNoteId(url) {
+    var u = safeUrl(url);
+    if (!u) return "";
+    try {
+      var parsed = new URL(u);
+      if (!/(^|\\.)xiaohongshu\\.com$/i.test(parsed.hostname)) return "";
+      var match = parsed.pathname.match(/\\/explore\\/([0-9a-f]{16,})(?:\\/|$)/i);
+      return match ? match[1] : "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function isMobileDevice() {
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+  }
+
+  /* 移动端优先尝试小红书公开深度链接；若未能切换到 App，再退回 HTTPS 笔记地址。
+     切到 App 时通常会触发 visibilitychange/pagehide；未触发则认为唤起失败。 */
+  function openXhsNote(url, noteId, noteType, btn) {
+    var route = noteType === "video" ? "video_feed"
+      : noteType === "long" ? "multi_note" : "item";
+    var deepLink = "xhsdiscover://" + route + "/" + encodeURIComponent(noteId);
+    var leftPage = false;
+    var timer = null;
+
+    function cleanup() {
+      if (timer !== null) window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", onPageHide);
+    }
+    function onVisibilityChange() {
+      if (document.visibilityState === "hidden") {
+        leftPage = true;
+        cleanup();
+      }
+    }
+    function onPageHide() {
+      leftPage = true;
+      cleanup();
+    }
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", onPageHide);
+    btn.textContent = "正在打开小红书…";
+    timer = window.setTimeout(function () {
+      cleanup();
+      if (leftPage || document.visibilityState === "hidden") return;
+      // 回退到笔记 HTTPS 地址：系统可能仍会按 Universal Link 唤起 App；否则至少打开网页版本。
+      window.location.href = url;
+    }, 1600);
+
+    window.location.href = deepLink;
+  }
+
+  function xhsLinkNodes(url, noteType) {
     var u = safeUrl(url);
     if (!u) return [];
-    var btn = el("button", { cls: "btn primary small", text: "复制链接去小红书", attrs: { type: "button" } });
-    btn.addEventListener("click", function () { copyText(u, btn, "已复制 · 去小红书打开"); });
+    var mobile = isMobileDevice();
+    var noteId = mobile ? xhsNoteId(u) : "";
+    var btn = el("button", {
+      cls: "btn primary small",
+      text: noteId ? "打开小红书笔记" : "复制链接去小红书",
+      attrs: { type: "button" }
+    });
+    btn.addEventListener("click", function () {
+      if (noteId) openXhsNote(u, noteId, noteType, btn);
+      else copyText(u, btn, "已复制 · 去小红书打开");
+    });
     var nodes = [btn];
+
+    // 移动端保留显式复制入口；部分内置浏览器会拦截自定义 Scheme。
+    if (noteId) {
+      var copyBtn = el("button", {
+        cls: "btn ghost small",
+        text: "复制网页链接",
+        attrs: { type: "button" }
+      });
+      copyBtn.addEventListener("click", function () { copyText(u, copyBtn, "已复制"); });
+      nodes.push(copyBtn);
+    }
 
     var app = inAppBrowserName();
     if (app) {
       nodes.push(el("div", {
         cls: "xhs-tip",
-        text: "在" + app + "里可能打不开小红书：复制链接后，打开小红书 App 粘贴即可。"
+        text: "当前在" + app + "内置浏览器中，可能会拦截打开 App。若没有跳转，请用右上角菜单选择「在浏览器中打开」后重试；也可先复制网页链接备用。"
       }));
     }
     return nodes;
@@ -453,13 +529,14 @@
           no: epNo(e),
           title: e.title,
           note: e.xiaohongshuNoteTitle,
-          url: e.xiaohongshuUrl
+          url: e.xiaohongshuUrl,
+          noteType: e.xiaohongshuType
         });
       }
     });
     (window.SERIES_NOTES || []).forEach(function (s) {
       if (safeUrl(s.url)) {
-        items.push({ kind: s.kind || "list", href: "", no: s.scope || "全系列", title: s.title, orig: "", note: "", url: s.url });
+        items.push({ kind: s.kind || "list", href: "", no: s.scope || "全系列", title: s.title, orig: "", note: "", url: s.url, noteType: s.xiaohongshuType });
       }
     });
     items.sort(function (a, b) { return NOTE_KIND_ORDER[a.kind] - NOTE_KIND_ORDER[b.kind]; });
@@ -482,7 +559,7 @@
         it.orig ? el("div", { cls: "sp-orig", text: it.orig }) : null,
         el("p", { text: it.note || "笔记已发布。" }),
         el("div", { cls: "sp-foot" },
-          xhsLinkNodes(it.url).concat([
+          xhsLinkNodes(it.url, it.noteType).concat([
             it.href ? el("a", { cls: "btn ghost small", href: it.href, text: "查看档案" }) : null,
             xhsQrBlock(it.url)
           ])
@@ -926,7 +1003,7 @@
 
     function buildNoteRow() {
       var act = el("div", { cls: "src-act" });
-      var nodes = xhsLinkNodes(ep.xiaohongshuUrl);
+      var nodes = xhsLinkNodes(ep.xiaohongshuUrl, ep.xiaohongshuType);
       if (nodes.length) nodes.forEach(function (n) { act.appendChild(n); });
       else if (ep.xiaohongshuNoteTitle) act.appendChild(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
       else act.appendChild(el("span", { cls: "missing", text: "暂未发布" }));
@@ -1098,7 +1175,7 @@
     var hasEditionLink = edRows.some(function (r) { return r.url; });
 
     var linkActions = [];
-    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl);
+    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl, book.xiaohongshuType);
     if (xhsNodes.length) xhsNodes.forEach(function (n) { linkActions.push(n); });
     else if (book.xiaohongshuNoteTitle) linkActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
     else linkActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
@@ -1188,7 +1265,7 @@
 
     var actions = [];
     /* 电影不做带读笔记，因而不放「暂未发布 / 链接待补」这类占位；仅当确有链接时才显示。 */
-    var xhsNodes = xhsLinkNodes(m.xiaohongshuUrl);
+    var xhsNodes = xhsLinkNodes(m.xiaohongshuUrl, m.xiaohongshuType);
     if (xhsNodes.length) xhsNodes.forEach(function (n) { actions.push(n); });
 
     var db = externalBtn("查看豆瓣影片页面 ↗", m.doubanUrl, "ghost small");
