@@ -1,0 +1,31 @@
+name: Check internal links
+
+on:
+  schedule:
+    # Every Sunday at 10:00 China Standard Time (02:00 UTC).
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lychee:
+    name: Check local links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Check internal links in HTML and Markdown
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # Offline mode skips external URLs (e.g. Xiaohongshu, Douban, Bilibili)
+          # to avoid false alarms from anti-bot rules and temporary network blocks.
+          args: >-
+            --offline
+            --verbose
+            --no-progress
+            './**/*.html'
+            './**/*.md'
+          fail: true
