@@ -1242,11 +1242,11 @@
         book.originalTitle ? el("div", { cls: "orig", text: book.originalTitle }) : null,
         el("div", { cls: "meta-row" }, [el("span", { cls: "badge", text: "书籍" })]),
         el("div", { cls: "byline" }, [el("span", { text: "作者 " }), el("b", { text: book.author || "待补" })]),
+        el("div", { cls: "actions", attrs: { style: "margin-top:14px" } }, topActions),
         book.summary ? el("p", { cls: "summary", text: book.summary }) : el("p", { cls: "missing", text: "简介待补。" }),
         book.note ? el("p", { cls: "note-line", text: "注：" + book.note }) : null,
         el("div", { cls: "chip-list", attrs: { style: "margin-top:14px" } },
-          (book.tags || []).map(function (t) { return el("span", { cls: "badge", text: t }); })),
-        el("div", { cls: "actions", attrs: { style: "margin-top:14px" } }, topActions)
+          (book.tags || []).map(function (t) { return el("span", { cls: "badge", text: t }); }))
       ])
     ]));
 
