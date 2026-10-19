@@ -551,7 +551,7 @@
   }
 
   /* 精选：只收录「已发布真实笔记链接」的条目；合集排在单本之前 */
-  var NOTE_KIND_LABEL = { list: "书单合集", shelf: "书架合集", note: "单本笔记" };
+  var NOTE_KIND_LABEL = { list: "系列总览", shelf: "番外", note: "带读笔记" };
   var NOTE_KIND_ORDER = { list: 0, shelf: 1, note: 2 };
 
   function renderSpotlight() {
@@ -1223,8 +1223,8 @@
     var topActions = [];
     var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl, book.xiaohongshuType);
     if (xhsNodes.length) xhsNodes.forEach(function (n) { topActions.push(n); });
-    else if (book.xiaohongshuNoteTitle) topActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
-    else topActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
+    else if (book.xiaohongshuNoteTitle) topActions.push(el("span", { cls: "badge draft", text: "已整理 · 链接待补" }));
+    else topActions.push(el("span", { cls: "missing", text: "暂未发布" }));
 
     /* 微信读书搜索帮助：跳到微信读书的搜索界面，读者自行挑选与译本对应的版本。
        不绑定具体译本，也不用维护 wereadUrl 数据；书名未核实时搜索页同样能给出线索。 */
@@ -1261,7 +1261,7 @@
       });
       epPanel.appendChild(chips);
     } else {
-      epPanel.appendChild(el("div", { cls: "missing", text: "这本书暂未关联到具体期数（期数待补）。" }));
+      epPanel.appendChild(el("div", { cls: "missing", text: "这本书暂未关联到具体期数。" }));
     }
     root.appendChild(epPanel);
 
@@ -1377,7 +1377,7 @@
       });
       epPanel.appendChild(chips);
     } else {
-      epPanel.appendChild(el("div", { cls: "missing", text: "这部电影暂未关联到具体期数（期数待补）。" }));
+      epPanel.appendChild(el("div", { cls: "missing", text: "这部电影暂未关联到具体期数。" }));
     }
     root.appendChild(epPanel);
 
