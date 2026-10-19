@@ -1269,6 +1269,11 @@
     var xhsQr = xhsQrBlock(book.xiaohongshuUrl);
     if (xhsQr) linkActions.push(xhsQr);
 
+    /* 微信读书搜索帮助：跳到微信读书的搜索界面，读者自行挑选与译本对应的版本。
+       不绑定具体译本，也不用维护 wereadUrl 数据；书名未核实时搜索页同样能给出线索。 */
+    var wr = externalBtn("微信读书搜本书 ↗", "https://weread.qq.com/web/search/books?keyword=" + encodeURIComponent(book.title), "ghost small");
+    if (wr) linkActions.push(wr);
+
     var panel = el("section", { cls: "panel" }, [el("h2", { text: "中文译本" })]);
     if (edRows.length) {
       panel.appendChild(el("ul", { cls: "plain-list" }, edRows.map(function (r) {
