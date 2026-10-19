@@ -616,6 +616,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
 .detail-info .meta-row { margin-top: var(--sp-2); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .detail-info .byline { margin-top: var(--sp-2); font-size: var(--fs-sm); color: var(--ink-2); }
 .detail-info .byline b { font-family: var(--font-serif); font-size: 1.02rem; }
+.detail-info .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
 .detail-info .summary { margin-top: var(--sp-3); font-size: 1.02rem; color: var(--ink-2); max-width: 62ch; }
 .note-line {
   margin-top: var(--sp-2); padding: 9px 12px; font-size: var(--fs-sm);
