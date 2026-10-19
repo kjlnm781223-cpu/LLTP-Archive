@@ -124,6 +124,25 @@
     });
   }
 
+  /* 微信读书搜索词：
+     - 系列书只搜系列主名（如「哈利·波特」），避免搜到具体分册反而匹配不到；
+     - 有重名风险的书连作者一起搜，命中更准；
+     - 其余直接用书名。 */
+  var WEREAD_SEARCH_KEYS = {
+    "book-001": "哈利·波特",
+    "book-019": "爱玛 简·奥斯汀",
+    "book-031": "波西·杰克逊",
+    "book-033": "我存在 玛姬·欧法洛"
+  };
+  function wereadSearchKey(book) {
+    if (book && WEREAD_SEARCH_KEYS[book.id]) return WEREAD_SEARCH_KEYS[book.id];
+    return book ? book.title : "";
+  }
+  function wereadSearchUrl(book) {
+    var kw = wereadSearchKey(book);
+    return kw ? "https://weread.qq.com/web/search/books?keyword=" + encodeURIComponent(kw) : "";
+  }
+
   /* 小红书电脑网页会强制登录，只有手机 App 能直接打开；
      电脑端补一张二维码方便扫码进去（移动端由 CSS 隐藏）。 */
   function xhsQrBlock(url) {
@@ -1057,6 +1076,15 @@
     /* 官方节目来源：只有填了有效链接时才出现，绝不凭猜测补 */
     var officialBtn = externalBtn("官方节目 ↗", ep.officialUrl, "ghost small");
 
+    /* 微信读书搜索入口：只有本期只讲一本书时才放（番外多本书不放），
+       搜索词沿用书籍页的规则（系列名 / 书名 + 作者）。 */
+    var epWrBtn = (ep.bookIds || []).length === 1
+      ? externalBtn("微信读书搜本书 ↗", wereadSearchUrl(byId(BOOKS, ep.bookIds[0])), "ghost small")
+      : null;
+    var epActions = [];
+    if (officialBtn) epActions.push(officialBtn);
+    if (epWrBtn) epActions.push(epWrBtn);
+
     root.appendChild(el("div", { cls: "detail-info" }, [
       el("span", { cls: "archive-no archive-no--stamp", text: epNo(ep) }),
       el("h1", { text: ep.title }),
@@ -1068,7 +1096,7 @@
       ]),
       ep.summary ? el("p", { cls: "summary", text: ep.summary }) : null,
       ep.note ? el("p", { cls: "note-line", text: "注：" + ep.note }) : null,
-      officialBtn ? el("div", { cls: "actions", attrs: { style: "margin-top:12px" } }, [officialBtn]) : null
+      epActions.length ? el("div", { cls: "actions", attrs: { style: "margin-top:12px" } }, epActions) : null
     ]));
 
     /* 中字回放（B 站）与带读笔记（小红书）按内容类型分别展示：
@@ -1191,6 +1219,21 @@
       el("span", { text: book.title })
     ]));
 
+    /* 带读笔记（小红书）+ 微信读书搜索入口：放在详情页头部，与作品信息并列，打开就能看到。 */
+    var topActions = [];
+    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl, book.xiaohongshuType);
+    if (xhsNodes.length) xhsNodes.forEach(function (n) { topActions.push(n); });
+    else if (book.xiaohongshuNoteTitle) topActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
+    else topActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
+
+    /* 微信读书搜索帮助：跳到微信读书的搜索界面，读者自行挑选与译本对应的版本。
+       不绑定具体译本，也不用维护 wereadUrl 数据；书名未核实时搜索页同样能给出线索。 */
+    var wrTop = externalBtn("微信读书搜本书 ↗", wereadSearchUrl(book), "ghost small");
+    if (wrTop) topActions.push(wrTop);
+
+    var xhsQr = xhsQrBlock(book.xiaohongshuUrl);
+    if (xhsQr) topActions.push(xhsQr);
+
     root.appendChild(el("div", { cls: "detail-head" }, [
       coverEl(book, { big: true }),
       el("div", { cls: "detail-info" }, [
@@ -1202,7 +1245,8 @@
         book.summary ? el("p", { cls: "summary", text: book.summary }) : el("p", { cls: "missing", text: "简介待补。" }),
         book.note ? el("p", { cls: "note-line", text: "注：" + book.note }) : null,
         el("div", { cls: "chip-list", attrs: { style: "margin-top:14px" } },
-          (book.tags || []).map(function (t) { return el("span", { cls: "badge", text: t }); }))
+          (book.tags || []).map(function (t) { return el("span", { cls: "badge", text: t }); })),
+        el("div", { cls: "actions", attrs: { style: "margin-top:14px" } }, topActions)
       ])
     ]));
 
@@ -1255,24 +1299,12 @@
     var hasEditionLink = edRows.some(function (r) { return r.url; });
 
     var linkActions = [];
-    var xhsNodes = xhsLinkNodes(book.xiaohongshuUrl, book.xiaohongshuType);
-    if (xhsNodes.length) xhsNodes.forEach(function (n) { linkActions.push(n); });
-    else if (book.xiaohongshuNoteTitle) linkActions.push(el("span", { cls: "badge draft", text: "笔记已整理 · 链接待补" }));
-    else linkActions.push(el("span", { cls: "missing", text: "带读笔记：暂未发布" }));
 
     /* 中文译本每一行都已带豆瓣入口时，不再重复放一个全书级豆瓣按钮 */
     if (!hasEditionLink) {
       var db = externalBtn("查看豆瓣书籍页面 ↗", book.doubanUrl, "ghost small");
       if (db) linkActions.push(db);
     }
-
-    var xhsQr = xhsQrBlock(book.xiaohongshuUrl);
-    if (xhsQr) linkActions.push(xhsQr);
-
-    /* 微信读书搜索帮助：跳到微信读书的搜索界面，读者自行挑选与译本对应的版本。
-       不绑定具体译本，也不用维护 wereadUrl 数据；书名未核实时搜索页同样能给出线索。 */
-    var wr = externalBtn("微信读书搜本书 ↗", "https://weread.qq.com/web/search/books?keyword=" + encodeURIComponent(book.title), "ghost small");
-    if (wr) linkActions.push(wr);
 
     var panel = el("section", { cls: "panel" }, [el("h2", { text: "中文译本" })]);
     if (edRows.length) {
