@@ -31,7 +31,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "人民文学出版社", translator: "", editionNote: "人民文学出版社 2000 年简体版（豆瓣评价最多）", sourceUrl: "" },
     episodeIds: ["episode-001"],
     tags: ["奇幻", "成长", "系列"],
-    summary: "J.K. 罗琳的奇幻系列首作，讲述哈利进入霍格沃茨魔法学校的第一年。",
+    summary: "在姨父家碗柜里住了十一年的哈利，收到一封来自霍格沃茨的信。原来自己是个巫师，还是魔法世界里那个从诅咒里活下来的男孩。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -60,7 +60,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "接力出版社", translator: "", editionNote: "简体中文版名为《周四推理俱乐部》", sourceUrl: "" },
     episodeIds: ["episode-004"],
     tags: ["推理", "系列"],
-    summary: "理查德·奥斯曼的推理小说，四位养老社区老人组成业余侦探团，联手调查连环命案。",
+    summary: "四个养老社区的老人家，把每周四的茶话会变成了破案会。本以为是打发时间的游戏，直到小区里真的挖出一桩陈年命案。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -89,7 +89,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "新蕾出版社", translator: "", editionNote: "简体中文版名为《当怪物来敲门》", sourceUrl: "" },
     episodeIds: ["episode-006"],
     tags: ["奇幻", "成长"],
-    summary: "派崔克·奈斯的成长小说，少年康纳在母亲病重时，遇见每晚来访的树怪。",
+    summary: "康纳十二岁，母亲病重。每天凌晨 12:07，窗外那棵老树变成怪物来找他，讲三个故事——它真正想要的第四个故事，是康纳自己都不敢听的真相。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -118,7 +118,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "北京十月文艺出版社", translator: "", editionNote: "2018 年简体版（豆瓣评价最多）", sourceUrl: "" },
     episodeIds: ["episode-008"],
     tags: ["历史", "战争"],
-    summary: "马克斯·苏萨克的小说，以二战德国为背景，讲述女孩莉赛尔靠偷书与文字活下来。",
+    summary: "二战德国，女孩莉赛尔偷书、认字、写自己的故事，靠文字从战争的缝隙里活下来——而讲这个故事的，是死神。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -150,7 +150,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "河北教育出版社", translator: "", editionNote: "简体版亦译作《记忆传授人》", sourceUrl: "" },
     episodeIds: ["episode-009"],
     tags: ["科幻", "反乌托邦"],
-    summary: "露易丝·劳瑞的反乌托邦小说，少年乔纳斯在看似完美的社区里发现被抹去的记忆。",
+    summary: "乔纳斯生活的社区没有痛苦，也没有选择，一切都安排得妥妥当当。直到他成为记忆传承人，才看见被抹掉的颜色和爱。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -177,7 +177,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "接力出版社", translator: "", editionNote: "简体中文版名为《周四推理俱乐部：活了两次的男人》", sourceUrl: "" },
     episodeIds: ["episode-011"],
     tags: ["推理", "系列"],
-    summary: "《星期四谋杀俱乐部》系列第二部，老侦探们再次卷入谋杀与旧案。",
+    summary: "《周四推理俱乐部》系列第二部。一个人死过一次不算完，又死了第二次——四位老伙计被拖进一桩跟旧案纠缠的谋杀。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -204,7 +204,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "译林出版社", translator: "陈灼", editionNote: "译林出版社 2015 年简体版", sourceUrl: "" },
     episodeIds: ["episode-014"],
     tags: ["科幻", "硬科幻", "生存"],
-    summary: "安迪·威尔的科幻小说，宇航员马克·沃特尼被遗留在火星，靠科学知识自救求生。",
+    summary: "宇航员马克被当成遇难者留在了火星上。没救援，没补给，他决定在火星上种土豆——把科学用到极限，活到有人来救他为止。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -234,7 +234,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "译林出版社", translator: "孙致礼", editionNote: "译林出版社 2010 年孙致礼译本（微信读书同译本）", sourceUrl: "" },
     episodeIds: ["episode-017"],
     tags: ["经典", "爱情", "名著"],
-    summary: "简·奥斯汀的经典小说，伊丽莎白与达西在误解与偏见中走向彼此。",
+    summary: "她聪明活泼，看不上他的傲慢；他有钱有貌，放不下对她的偏见。一个用误会推开对方，一个用傲慢藏起真心——两个互相喜欢的人，差点就这样错过。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -270,7 +270,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "人民文学出版社", translator: "姚乃强", editionNote: "人民文学出版社 2004 年姚乃强译本（豆瓣评价最多）", sourceUrl: "" },
     episodeIds: ["episode-019", "episode-guanshu"],
     tags: ["经典", "名著"],
-    summary: "菲茨杰拉德的小说，讲述 1920 年代纽约长岛，盖茨比对旧爱黛西的执念。",
+    summary: "爵士时代的纽约长岛，盖茨比隔着一片海湾，夜夜望着对岸那盏绿灯——那是旧爱黛西家的方向，也是他用一场场派对堆起来的梦。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -306,7 +306,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "贵州人民出版社", translator: "", editionNote: "1998 年全译本（豆瓣评价最多）", sourceUrl: "" },
     episodeIds: ["episode-021"],
     tags: ["推理", "名著"],
-    summary: "阿加莎·克里斯蒂的推理小说，侦探波洛在尼罗河游轮上调查命案。",
+    summary: "新婚夫妇登上尼罗河的游轮度蜜月，蜜月还没过完，新娘就死了。船上每个人都有嫌疑，波洛要在船靠岸前，把凶手从人群里挑出来。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -339,7 +339,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "译林出版社", translator: "杨苡", editionNote: "译林出版社 2010 年杨苡译本（豆瓣评价最多）", sourceUrl: "" },
     episodeIds: ["episode-023"],
     tags: ["经典", "名著", "爱情"],
-    summary: "艾米莉·勃朗特的经典小说，讲述希斯克利夫与凯瑟琳之间的爱恨。",
+    summary: "孤儿希斯克利夫和凯瑟琳在荒原一起长大，他爱她爱得不管不顾——可她嫁给了别人。于是他把余生烧成一场复仇，一直烧到下一代的儿女身上。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -373,7 +373,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "四川科学技术出版社", translator: "徐百柯", editionNote: "2005 年简体版（豆瓣评价最多）", sourceUrl: "" },
     episodeIds: ["episode-024"],
     tags: ["科幻", "喜剧"],
-    summary: "道格拉斯·亚当斯的科幻喜剧，地球被拆除后，主人公开始一场荒诞的银河冒险。",
+    summary: "地球要拆迁，他搭上外星人的飞船逃进了银河。随身带一本《银河系漫游指南》，连宇宙终极问题的答案都写着——42。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -406,7 +406,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "译林出版社", translator: "孙致礼", editionNote: "简体中文版名为《爱玛》（译林出版社）", sourceUrl: "" },
     episodeIds: ["episode-026"],
     tags: ["经典", "名著"],
-    summary: "简·奥斯汀的小说，讲述爱撮合别人婚事的艾玛自己的成长。",
+    summary: "艾玛什么都不缺，就爱替别人牵线搭桥，把身边人的婚事安排得明明白白——直到发现自己才是那个最看不清姻缘的人。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -441,7 +441,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "新星出版社", translator: "", editionNote: "2011 年简体版（豆瓣评价最多）", sourceUrl: "" },
     episodeIds: ["episode-028"],
     tags: ["推理", "名著", "系列"],
-    summary: "柯南·道尔的第一部福尔摩斯小说，福尔摩斯与华生首次相遇并侦破命案。",
+    summary: "福尔摩斯与华生的第一次见面：一间贝克街的合租房，和一桩写着血字的命案。",
     verificationStatus: "confirmed",
     sources: [
       { label: "粉丝整理 LLTP 期数表", url: "" },
@@ -475,7 +475,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: null, publisher: "寂寞出版（繁体）", translator: "謝佳真（繁体）", editionNote: "目前仅见英文原版（2024-10）与繁体版（寂寞出版，謝佳真 译，2025-10）；简体版待确认", sourceUrl: "" },
     episodeIds: ["episode-guanshu"],
     tags: ["小说", "哥特"],
-    summary: "C. G. 德鲁丝的哥特小说：写作者笔下的怪物成真，开始袭击身边的人。",
+    summary: "写作者笔下的怪物成了真，开始袭击身边的人。两个女孩躲进深林里的寄宿学校，才发现最可怕的故事，是自己写出来的那个。",
     verificationStatus: "confirmed",
     sources: [
       { label: "LLTP 番外·逛书架 整理图", url: "" },
@@ -502,7 +502,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "上海译文出版社", translator: "林智玲、程德", editionNote: "上海译文 1994 年初版、2006 年再版（林智玲、程德 译）", sourceUrl: "" },
     episodeIds: ["episode-guanshu"],
     tags: ["悬疑", "名著"],
-    summary: "达夫妮·杜穆里埃的小说，讲述女主角嫁入曼陀丽庄园后，被前妻丽贝卡的阴影笼罩。",
+    summary: "年轻女孩嫁进曼陀丽庄园，可这座宅子到处都留着前妻丽贝卡的影子——一个活人，怎么都赢不过一个死人。",
     verificationStatus: "confirmed",
     sources: [
       { label: "LLTP 番外·逛书架 整理图", url: "" },
@@ -536,7 +536,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "接力出版社", translator: "薛白", editionNote: "系列第一册《波西·杰克逊与神火之盗》，接力出版社 2010 年 3 月版，薛白 译", sourceUrl: "" },
     episodeIds: ["episode-guanshu"],
     tags: ["奇幻", "系列", "成长"],
-    summary: "雷克·莱尔顿的奇幻系列，讲述少年波西发现自己身份是希腊神话中的半神。",
+    summary: "波西在学校里永远惹麻烦，直到发现自己是希腊神话里的半神——从此他的问题从「作业写没写」，变成「哪个神是我的爸爸」。",
     verificationStatus: "confirmed",
     sources: [
       { label: "LLTP 番外·逛书架 整理图", url: "" },
@@ -567,7 +567,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: null, publisher: "臉譜（繁体台版）", translator: "徐彩嫦（繁体）", editionNote: "目前仅见英文原版与繁体台版（臉譜，徐彩嫦 译，2024-03）；简体版待确认", sourceUrl: "https://book.douban.com/subject/36722353/" },
     episodeIds: ["episode-guanshu"],
     tags: ["音乐", "小说"],
-    summary: "泰勒·詹金斯·里德的小说，以访谈形式讲述一支虚构摇滚乐队的兴衰。",
+    summary: "1970 年代，一支摇滚乐队从地下酒吧唱到万人体育场，却在最红的时候一夜散伙——没有叙述者，真相藏在几十段采访里。",
     verificationStatus: "confirmed",
     sources: [
       { label: "LLTP 番外·逛书架 整理图", url: "" },
@@ -596,7 +596,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "武汉大学出版社", translator: "刘雅娟", editionNote: "2022 年 2 月版，副标题「十七段与死亡擦肩而过的经历」", sourceUrl: "" },
     episodeIds: ["episode-guanshu"],
     tags: ["回忆录"],
-    summary: "玛姬·欧法洛的回忆录，以十七段与死亡擦肩而过的经历回望人生。",
+    summary: "作家玛姬·欧法洛把一生里十七次与死亡擦肩而过的瞬间写下来——溺水、坠崖、病床、产房，每一次她都在想：我存在，我还活着。",
     verificationStatus: "confirmed",
     sources: [
       { label: "LLTP 番外·逛书架 整理图", url: "" },
@@ -623,7 +623,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "中国友谊出版公司", translator: "薛玮", editionNote: "2024 年 9 月版，薛玮 译", sourceUrl: "" },
     episodeIds: ["episode-guanshu"],
     tags: ["回忆录", "成长"],
-    summary: "珍妮特·麦柯迪的回忆录，讲述她作为童星的成长经历与家庭关系。",
+    summary: "她是童星，从会走路起就在片场长大，吃饭、试镜、体重全由妈妈安排。妈妈走后，她才开始做那个一直没机会做的人——自己。",
     verificationStatus: "confirmed",
     sources: [
       { label: "LLTP 番外·逛书架 整理图", url: "" },
@@ -650,7 +650,7 @@ window.BOOKS = [
     chineseEdition: { hasSimplifiedChinese: true, publisher: "译林出版社", translator: "孙法理", editionNote: "译林出版社 2016 年 12 月版，孙法理 译", sourceUrl: "" },
     episodeIds: ["episode-frankenstein"],
     tags: ["科幻", "名著", "预告"],
-    summary: "玛丽·雪莱的科幻小说（1818），讲述科学家维克多创造生命后的悲剧。",
+    summary: "科学家维克多用尸块拼出一个人造生命，又因为它的模样转身逃走——被造出来的怪物没人爱、没人教，于是回头报复造它的人。",
     verificationStatus: "confirmed",
     sources: [
       { label: "LLTP 预告·弗兰肯斯坦 整理图", url: "" },
