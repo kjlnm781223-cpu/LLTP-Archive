@@ -974,6 +974,64 @@
     paint();
   }
 
+
+  /* ---------------- 结构化数据（JSON-LD） ----------------
+     只输出当前详情页实际存在的数据；不补猜测值。
+     期数使用 CreativeWork，而非 PodcastEpisode：本站资料不足以证明它是播客节目。
+  */
+  function addJsonLd(data) {
+    var old = document.getElementById("lltp-jsonld");
+    if (old) old.remove();
+    var script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.id = "lltp-jsonld";
+    script.textContent = JSON.stringify(data).replace(/</g, "\\u003c");
+    document.head.appendChild(script);
+  }
+
+  function addBookJsonLd(book) {
+    var data = {
+      "@context": "https://schema.org",
+      "@type": "Book",
+      "name": book.title,
+      "url": window.location.href.split("#")[0],
+      "inLanguage": "zh-CN"
+    };
+    if (book.originalTitle) data.alternateName = book.originalTitle;
+    if (book.author) data.author = { "@type": "Person", "name": book.author };
+    if (book.summary) data.abstract = book.summary;
+    addJsonLd(data);
+  }
+
+  function addMovieJsonLd(movie) {
+    var data = {
+      "@context": "https://schema.org",
+      "@type": "Movie",
+      "name": movie.title,
+      "url": window.location.href.split("#")[0],
+      "inLanguage": "zh-CN"
+    };
+    if (movie.originalTitle) data.alternateName = movie.originalTitle;
+    if (typeof movie.year === "number") data.dateCreated = String(movie.year);
+    if (movie.director) data.director = { "@type": "Person", "name": movie.director };
+    if (movie.summary) data.description = movie.summary;
+    addJsonLd(data);
+  }
+
+  function addEpisodeJsonLd(episode) {
+    var data = {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "name": episode.title,
+      "url": window.location.href.split("#")[0],
+      "isPartOf": { "@type": "CreativeWork", "name": "LLTP · Lily's Lost the Plot" }
+    };
+    if (episode.englishTitle) data.alternateName = episode.englishTitle;
+    if (episode.summary) data.description = episode.summary;
+    if (episode.episodeNumber != null) data.position = episode.episodeNumber;
+    addJsonLd(data);
+  }
+
   /* ---------------- 期数详情 ---------------- */
 
   function renderEpisodePage() {
@@ -988,6 +1046,7 @@
     }
 
     document.title = (ep.episodeNumber != null ? epShort(ep) + " · " : "") + ep.title + " · LLTP Archive";
+    addEpisodeJsonLd(ep);
 
     root.appendChild(el("nav", { cls: "breadcrumb" }, [
       el("a", { href: "index.html", text: "首页" }),
@@ -1124,6 +1183,7 @@
     }
 
     document.title = book.title + " · LLTP Archive";
+    addBookJsonLd(book);
 
     root.appendChild(el("nav", { cls: "breadcrumb" }, [
       el("a", { href: "index.html", text: "首页" }),
@@ -1238,6 +1298,7 @@
     }
 
     document.title = m.title + " · LLTP Archive";
+    addMovieJsonLd(m);
 
     root.appendChild(el("nav", { cls: "breadcrumb" }, [
       el("a", { href: "index.html", text: "首页" }),
