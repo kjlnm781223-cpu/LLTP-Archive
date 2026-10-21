@@ -62,16 +62,11 @@
 
   /* Form */
   --radius:    3px;
-  --radius-lg: 5px;
   --hair:      1px;
 
   /* Motion */
   --dur: .26s;
   --ease: cubic-bezier(.22, .61, .36, 1);
-
-  /* Elevation (used only on the paper, never "glass") */
-  --shadow-1: 0 1px 0 rgba(37,36,32,.05);
-  --shadow-2: 0 18px 40px -26px rgba(37,36,32,.55);
 }
 
 /* ------------------------------ 1. Reset & base ------------------------- */
@@ -134,8 +129,6 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
   padding: 2px 8px;
   color: var(--ink);
 }
-
-.rule-x { border-top: var(--hair) solid var(--rule); }
 
 /* 章节标题：编号 + 标题 + 说明，用一条粗线压住 */
 .section { padding: var(--sp-6) 0 0; }
@@ -280,7 +273,6 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
 .hero-en {
   font-family: var(--font-serif); font-style: italic;
   font-size: clamp(1.05rem, 2.3vw, 1.4rem); color: var(--ink-2);
-  border-left: 3px solid var(--acid); padding-left: 12px;
 }
 .hero-zh { margin-top: var(--sp-3); max-width: 46ch; color: var(--ink-2); }
 .hero-zh strong { color: var(--ink); }
@@ -845,5 +837,4 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
   background: transparent; color: var(--paper); padding: 0;
 }
 .notice-close:hover { background: rgba(245,240,232,.16); }
-.notice-link { margin-left: auto; }
 .notice-close + * { margin-left: 0; }
