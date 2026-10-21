@@ -690,6 +690,9 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
   .xhs-qr-cap { font-size: var(--fs-sm); color: var(--ink-3); max-width: 32ch; }
 }
 
+/* 精选卡二维码：默认收起，点「手机扫码」才展开 */
+.sp-qr .xhs-qr[hidden] { display: none; }
+
 /* 微信 / QQ / 百度等内置浏览器会在提示条里说明：这些环境可能拦截跳转 */
 .xhs-tip {
   flex: 1 0 100%; margin-top: 6px; padding: 9px 11px;
@@ -804,6 +807,7 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
 
   .ep-table .col-orig { display: none; }
   .ep-table .c-ep { width: 60px; }
+  .sp-qr { display: none; } /* 手机端已能直接点链接进 App，不需要扫码 */
 
   .movie-card { grid-template-columns: 58px 1fr; gap: var(--sp-2); }
   .m-poster { width: 58px; padding: 5px; }

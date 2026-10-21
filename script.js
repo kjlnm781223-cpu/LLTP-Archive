@@ -160,6 +160,29 @@
     ]);
   }
 
+  // 精选卡专用：二维码默认收起，点「手机扫码」再展开，避免卡面被二维码占满。
+  function spotQrToggle(url) {
+    var u = safeUrl(url);
+    if (!u) return null;
+    var m = u.match(/[0-9a-fA-F]{16,}/);
+    var src = (m && window.XHS_QR) ? window.XHS_QR[m[0]] : null;
+    if (!src) return null;
+    var wrap = el("div", { cls: "sp-qr" });
+    var btn = el("button", { cls: "btn ghost small sp-qr-toggle", attrs: { type: "button", "aria-expanded": "false" }, text: "手机扫码 ↗" });
+    var box = el("div", { cls: "xhs-qr", attrs: { hidden: "" } }, [
+      el("img", { cls: "xhs-qr-img", attrs: { src: src, alt: "小红书笔记二维码", width: "104", height: "104" } }),
+      el("div", { cls: "xhs-qr-cap", text: "电脑打不开小红书？用手机扫码直接进 App。" })
+    ]);
+    btn.addEventListener("click", function () {
+      var open = box.hasAttribute("hidden");
+      box.hidden = !open;
+      btn.setAttribute("aria-expanded", String(open));
+    });
+    wrap.appendChild(btn);
+    wrap.appendChild(box);
+    return wrap;
+  }
+
   // 微信 / QQ / 百度等内置浏览器会拦截「网页跳 App」，且部分（如百度）会把跳转变成下载。
   function inAppBrowserName() {
     var ua = navigator.userAgent;
@@ -600,7 +623,7 @@
         el("div", { cls: "sp-foot" },
           xhsLinkNodes(it.url, it.noteType).concat([
             it.href ? el("a", { cls: "btn ghost small", href: it.href, text: "查看档案" }) : null,
-            xhsQrBlock(it.url)
+            spotQrToggle(it.url)
           ])
         )
       ]);
