@@ -24,8 +24,8 @@ window.BOOK_NETWORK = {
   ],
   // level: 0 入门 / 1 进阶 / 2 挑战
   books: {
-    "book-001": { level: 0, short: "哈利·波特", lanes: ["fantasy"] },
-    "book-031": { level: 0, short: "波西·杰克逊", lanes: ["fantasy"] },
+    "book-001": { level: 0, short: "哈利·波特与魔法石", lanes: ["fantasy"] },
+    "book-031": { level: 0, short: "波西·杰克逊系列", lanes: ["fantasy"] },
     "book-004": { level: 1, short: "当怪物来敲门", lanes: ["fantasy"] },
 
     "book-002": { level: 0, short: "周四推理俱乐部", lanes: ["mystery"] },
@@ -44,7 +44,12 @@ window.BOOK_NETWORK = {
     "book-012": { level: 1, short: "了不起的盖茨比", lanes: ["classic"] },
     "book-016": { level: 2, short: "呼啸山庄", lanes: ["classic"] },
 
-    "book-034": { level: 0, short: "我妈走后", lanes: ["nonfiction"] },
+    "book-034": {
+      level: 0,
+      short: "我妈走后，我终于成了一个正常人",
+      lines: ["我妈走后，", "我终于成了一个正常人"],
+      lanes: ["nonfiction"]
+    },
     "book-033": { level: 1, short: "我存在", lanes: ["nonfiction"] }
   }
 };
@@ -70,7 +75,7 @@ window.BOOK_NETWORK = {
         if (item.lanes.indexOf(lane.id) < 0) return;
         var book = booksById[id];
         if (!book) return; // 数据里没有的书直接跳过，不画空心节点
-        cells[item.level].push({ id: id, short: item.short, book: book });
+        cells[item.level].push({ id: id, short: item.short, lines: item.lines, book: book });
       });
       return { lane: lane, cells: cells };
     }).map(function (row) {
@@ -121,10 +126,18 @@ window.BOOK_NETWORK = {
         cell.forEach(function (item, i) {
           var ny = y + NODE_TOP + i * LINE_H;
           pos[item.id + "|" + row.lane.id] = { x: colX[ci], y: ny };
+          var label;
+          if (item.lines && item.lines.length > 1) {
+            label = item.lines.map(function (line, li) {
+              return '<tspan x="' + (colX[ci] + 20) + '"' + (li ? ' dy="25"' : "") + ">" + esc(line) + "</tspan>";
+            }).join("");
+          } else {
+            label = esc(item.short);
+          }
           out.push(
             '<a class="net-book" href="book.html?id=' + encodeURIComponent(item.id) + '">' +
               '<circle class="net-dot net-dot--' + NET.levels[ci].id + '" cx="' + colX[ci] + '" cy="' + (ny - 6) + '" r="4.5" />' +
-              '<text x="' + (colX[ci] + 20) + '" y="' + ny + '">' + esc(item.short) + "</text>" +
+              '<text x="' + (colX[ci] + 20) + '" y="' + ny + '">' + label + "</text>" +
             "</a>"
           );
         });
@@ -135,7 +148,10 @@ window.BOOK_NETWORK = {
       var ends = row.cells.map(function (cell) {
         if (!cell.length) return null;
         var maxLen = 0;
-        cell.forEach(function (it) { if (it.short.length > maxLen) maxLen = it.short.length; });
+        cell.forEach(function (it) {
+          var w = it.lines ? Math.max.apply(null, it.lines.map(function (l) { return l.length; })) : it.short.length;
+          if (w > maxLen) maxLen = w;
+        });
         return colX[row.cells.indexOf(cell)] + 20 + maxLen * 19 + 16;
       });
       for (var i = 0; i < 2; i++) {
