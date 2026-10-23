@@ -837,4 +837,38 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
   background: transparent; color: var(--paper); padding: 0;
 }
 .notice-close:hover { background: rgba(245,240,232,.16); }
+
+/* ------------------------- 阅读网络（network.html） ------------------------ */
+#netRoot { margin-top: var(--sp-3); }
+.net-svg { display: block; width: 100%; height: auto; }
+.net-col-label { font-family: var(--font-mono); font-size: 13px; letter-spacing: .16em; fill: var(--ink-3); }
+.net-lane-label { font-family: var(--font-serif); font-size: 20px; font-weight: 600; fill: var(--ink); }
+.net-row-rule { stroke: var(--rule-2); stroke-width: 1; }
+.net-book text { font-family: var(--font-serif); font-size: 19px; fill: var(--ink-2); }
+.net-book:hover text { fill: var(--vermilion); }
+.net-dot { fill: var(--ink-3); }
+.net-dot--entry { fill: var(--vermilion); }
+.net-dot--step { fill: var(--ink-3); }
+.net-dot--challenge { fill: var(--ink); }
+.net-link { fill: none; stroke: var(--ink-3); stroke-width: 1; opacity: .35; }
+.net-bridge { fill: none; stroke: var(--vermilion); stroke-width: 1.2; stroke-dasharray: 4 5; opacity: .6; }
+.net-note { font-size: var(--fs-sm); color: var(--ink-3); margin-top: var(--sp-3); max-width: 62ch; }
+
+/* 手机端不做缩小版连线图，改成按类型分组的列表 */
+.net-list { display: none; }
+.net-lane { padding: 18px 0; border-top: var(--hair) solid var(--rule-2); }
+.net-lane h3 { font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: 6px; }
+.net-tier { display: flex; gap: 10px; padding: 5px 0; align-items: baseline; }
+.net-tier-name {
+  font-family: var(--font-mono); font-size: var(--fs-meta); letter-spacing: .1em;
+  color: var(--vermilion); width: 38px; flex: none;
+}
+.net-tier-items { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.net-tier-items a { color: var(--ink-2); font-size: var(--fs-sm); }
+.net-tier-items a:hover { color: var(--vermilion); }
+
+@media (max-width: 720px) {
+  .net-svg { display: none; }
+  .net-list { display: block; }
+}
 .notice-close + * { margin-left: 0; }
