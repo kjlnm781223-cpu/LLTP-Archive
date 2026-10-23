@@ -20,10 +20,7 @@ window.BOOK_NETWORK = {
     { id: "mystery", name: "推理" },
     { id: "scifi", name: "科幻" },
     { id: "classic", name: "经典" },
-    { id: "gothic", name: "悬疑 · 哥特" },
-    { id: "history", name: "历史" },
-    { id: "nonfiction", name: "非虚构" },
-    { id: "music", name: "音乐" }
+    { id: "nonfiction", name: "非虚构" }
   ],
   // level: 0 入门 / 1 进阶 / 2 挑战
   books: {
@@ -32,29 +29,23 @@ window.BOOK_NETWORK = {
     "book-004": { level: 1, short: "当怪物来敲门", lanes: ["fantasy"] },
 
     "book-002": { level: 0, short: "周四推理俱乐部", lanes: ["mystery"] },
-    "book-007": { level: 1, short: "活了两次的男人", lanes: ["mystery"] },
+    "book-007": { level: 0, short: "活了两次的男人", lanes: ["mystery"] },
     "book-014": { level: 1, short: "尼罗河上的惨案", lanes: ["mystery"] },
     "book-021": { level: 1, short: "血字的研究", lanes: ["mystery"] },
 
-    "book-017": { level: 0, short: "银河系漫游指南", lanes: ["scifi"] },
+    "book-006": { level: 0, short: "记忆传授人", lanes: ["scifi"] },
     "book-009": { level: 1, short: "火星救援", lanes: ["scifi"] },
-    "book-006": { level: 1, short: "记忆传授人", lanes: ["scifi"] },
+    "book-017": { level: 1, short: "银河系漫游指南", lanes: ["scifi"] },
     "book-037": { level: 2, short: "弗兰肯斯坦", lanes: ["scifi", "classic"] },
 
-    "book-019": { level: 0, short: "爱玛", lanes: ["classic"] },
-    "book-011": { level: 1, short: "傲慢与偏见", lanes: ["classic"] },
+    "book-011": { level: 0, short: "傲慢与偏见", lanes: ["classic"] },
+    "book-030": { level: 0, short: "蝴蝶梦", lanes: ["classic"] },
+    "book-019": { level: 1, short: "爱玛", lanes: ["classic"] },
     "book-012": { level: 1, short: "了不起的盖茨比", lanes: ["classic"] },
-    "book-030": { level: 1, short: "蝴蝶梦", lanes: ["classic", "gothic"] },
     "book-016": { level: 2, short: "呼啸山庄", lanes: ["classic"] },
 
-    "book-029": { level: 1, short: "密林勿近", lanes: ["gothic"] },
-
-    "book-005": { level: 1, short: "偷书贼", lanes: ["history"] },
-
     "book-034": { level: 0, short: "我妈走后", lanes: ["nonfiction"] },
-    "book-033": { level: 1, short: "我存在", lanes: ["nonfiction"] },
-
-    "book-032": { level: 1, short: "黛西与乐队", lanes: ["music"] }
+    "book-033": { level: 1, short: "我存在", lanes: ["nonfiction"] }
   }
 };
 
@@ -180,19 +171,40 @@ window.BOOK_NETWORK = {
   }
 
   function renderList(rows) {
+    var laneName = {};
+    NET.lanes.forEach(function (l) { laneName[l.id] = l.name; });
+
     var html = [];
     rows.forEach(function (row) {
       var hasAny = row.cells.some(function (c) { return c.length; });
       if (!hasAny) return;
-      html.push('<section class="net-lane"><h3>' + esc(row.lane.name) + "</h3>");
+      html.push('<section class="mlane"><h3>' + esc(row.lane.name) + "</h3>");
       row.cells.forEach(function (cell, ci) {
         if (!cell.length) return;
-        html.push('<div class="net-tier"><span class="net-tier-name">' + esc(NET.levels[ci].name) + "</span>");
-        html.push('<div class="net-tier-items">');
+        html.push('<div class="mtier mtier--' + NET.levels[ci].id + '">');
+        html.push('<div class="mtier-name">' + esc(NET.levels[ci].name) + "</div>");
         cell.forEach(function (item) {
-          html.push('<a href="book.html?id=' + encodeURIComponent(item.id) + '">' + esc(item.short) + "</a>");
+          var meta = NET.books[item.id];
+          var href = "book.html?id=" + encodeURIComponent(item.id);
+          if (meta.lanes[0] === row.lane.id) {
+            html.push(
+              '<a class="mbook" data-book="' + item.id + '" href="' + href + '">' +
+                "<span>" + esc(item.short) + "</span>" +
+                '<span class="mbook-arrow" aria-hidden="true">→</span>' +
+              "</a>"
+            );
+          } else {
+            // 手机端不拉长线：同一本书只在主类型出现一次，
+            // 另一条类型里放一行引用，点进去还是同一本书。
+            html.push(
+              '<a class="mbook mbook--ref" data-book="' + item.id + '" href="' + href + '">' +
+                "<span>↳ 也属" + esc(laneName[meta.lanes[0]] || "") + " · " + esc(item.short) + "</span>" +
+                '<span class="mbook-arrow" aria-hidden="true">→</span>' +
+              "</a>"
+            );
+          }
         });
-        html.push("</div></div>");
+        html.push("</div>");
       });
       html.push("</section>");
     });

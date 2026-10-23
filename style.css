@@ -854,18 +854,31 @@ h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 600; line-height: 
 .net-bridge { fill: none; stroke: var(--vermilion); stroke-width: 1.2; stroke-dasharray: 4 5; opacity: .6; }
 .net-note { font-size: var(--fs-sm); color: var(--ink-3); margin-top: var(--sp-3); max-width: 62ch; }
 
-/* 手机端不做缩小版连线图，改成按类型分组的列表 */
+/* 手机端不做缩小版连线图，改成按类型走的竖向路径 */
 .net-list { display: none; }
-.net-lane { padding: 18px 0; border-top: var(--hair) solid var(--rule-2); }
-.net-lane h3 { font-family: var(--font-serif); font-size: 1.1rem; margin-bottom: 6px; }
-.net-tier { display: flex; gap: 10px; padding: 5px 0; align-items: baseline; }
-.net-tier-name {
-  font-family: var(--font-mono); font-size: var(--fs-meta); letter-spacing: .1em;
-  color: var(--vermilion); width: 38px; flex: none;
+.mlane { margin-bottom: 40px; }
+.mlane h3 { font-family: var(--font-serif); font-size: 1.24rem; font-weight: 600; margin: 0 0 12px; color: var(--ink); }
+.mtier { position: relative; padding-left: 28px; }
+.mtier-name {
+  position: relative;
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em;
+  color: var(--ink-3); padding: 4px 0 2px;
 }
-.net-tier-items { display: flex; flex-wrap: wrap; gap: 4px 14px; }
-.net-tier-items a { color: var(--ink-2); font-size: var(--fs-sm); }
-.net-tier-items a:hover { color: var(--vermilion); }
+.mtier-name::before {
+  content: ""; position: absolute; left: -28px; top: 9px;
+  width: 9px; height: 9px; border-radius: 50%; background: var(--ink-3);
+}
+.mtier--entry .mtier-name::before { background: var(--vermilion); }
+.mtier--challenge .mtier-name::before { background: var(--ink); }
+.mbook {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  min-height: 50px; font-size: 16px; color: var(--ink); text-decoration: none;
+  border-bottom: var(--hair) solid var(--rule-2);
+}
+.mbook:active { color: var(--vermilion); }
+.mbook--ref { color: var(--ink-3); border-bottom-style: dashed; }
+.mbook--ref:active { color: var(--vermilion); }
+.mbook-arrow { flex: none; color: var(--ink-4); font-size: 14px; }
 
 @media (max-width: 720px) {
   .net-svg { display: none; }

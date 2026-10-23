@@ -461,7 +461,7 @@
       });
     }
     var page = document.body.getAttribute("data-page");
-    var map = { episodes: "episodes", books: "books", book: "books", movies: "films", movie: "films", films: "films", journal: "journal", about: "about" };
+    var map = { episodes: "episodes", books: "books", book: "books", movies: "films", movie: "films", films: "films", network: "network", journal: "journal", about: "about" };
     var active = map[page] || "";
     if (!active) return;
     document.querySelectorAll(".mh-nav a[data-nav]").forEach(function (a) {
