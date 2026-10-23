@@ -171,9 +171,6 @@ window.BOOK_NETWORK = {
   }
 
   function renderList(rows) {
-    var laneName = {};
-    NET.lanes.forEach(function (l) { laneName[l.id] = l.name; });
-
     var html = [];
     rows.forEach(function (row) {
       var hasAny = row.cells.some(function (c) { return c.length; });
@@ -184,25 +181,12 @@ window.BOOK_NETWORK = {
         html.push('<div class="mtier mtier--' + NET.levels[ci].id + '">');
         html.push('<div class="mtier-name">' + esc(NET.levels[ci].name) + "</div>");
         cell.forEach(function (item) {
-          var meta = NET.books[item.id];
-          var href = "book.html?id=" + encodeURIComponent(item.id);
-          if (meta.lanes[0] === row.lane.id) {
-            html.push(
-              '<a class="mbook" data-book="' + item.id + '" href="' + href + '">' +
-                "<span>" + esc(item.short) + "</span>" +
-                '<span class="mbook-arrow" aria-hidden="true">→</span>' +
-              "</a>"
-            );
-          } else {
-            // 手机端不拉长线：同一本书只在主类型出现一次，
-            // 另一条类型里放一行引用，点进去还是同一本书。
-            html.push(
-              '<a class="mbook mbook--ref" data-book="' + item.id + '" href="' + href + '">' +
-                "<span>↳ 也属" + esc(laneName[meta.lanes[0]] || "") + " · " + esc(item.short) + "</span>" +
-                '<span class="mbook-arrow" aria-hidden="true">→</span>' +
-              "</a>"
-            );
-          }
+          html.push(
+            '<a class="mbook" data-book="' + item.id + '" href="book.html?id=' + encodeURIComponent(item.id) + '">' +
+              "<span>" + esc(item.short) + "</span>" +
+              '<span class="mbook-arrow" aria-hidden="true">→</span>' +
+            "</a>"
+          );
         });
         html.push("</div>");
       });
